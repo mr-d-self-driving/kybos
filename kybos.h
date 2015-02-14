@@ -66,7 +66,6 @@
 #define HAS_GPIO_D
 #define HAS_GPIO_E
 #define HAS_GPIO_H
-#define HAS_GPIO_I
 #endif
 
 #if defined (STM32L100xB) || defined (STM32L100xBA) || defined (STM32L100xC)
