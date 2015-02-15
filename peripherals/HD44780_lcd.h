@@ -1,5 +1,5 @@
-#if !defined  __LCD_H
-#define __LCD_H
+#if !defined  HD44780_LCD_H
+#define HD44780_LCD_H
 
 #include <stdint.h>
 #include "../GPIO.h"
@@ -51,4 +51,5 @@ private:
 
 
 
-#endif
+#endif // HD44780_LCD_H
+
