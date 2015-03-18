@@ -8,10 +8,11 @@
 #ifndef STM32LCDCONTROLLER_H_
 #define STM32LCDCONTROLLER_H_
 
+#include "../kybos.h"
+
 #ifdef HAS_LCD_CONTROLLER
 
 
-#include "../kybos.h"
 #include GENERATE_HAL_INCLUDE(STM32_FAMILY,)
 #include GENERATE_HAL_INCLUDE(STM32_FAMILY, _lcd)
 
