@@ -7,6 +7,8 @@
 
 #include "Stm32LcdController.h"
 
+#ifdef HAS_LCD_CONTROLLER
+
 
 //#include GENERATE_HAL_INCLUDE(STM32_FAMILY, _def)
 //#include GENERATE_HAL_INCLUDE(STM32_FAMILY, _rcc)
@@ -210,4 +212,6 @@ void HAL_LCD_MspDeInit(LCD_HandleTypeDef* hlcd)
 Stm32LcdController::Stm32LcdController()
 {
 }
+
+#endif // HAS_LCD_CONTROLLER
 

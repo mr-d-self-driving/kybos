@@ -8,6 +8,9 @@
 #ifndef STM32LCDCONTROLLER_H_
 #define STM32LCDCONTROLLER_H_
 
+#ifdef HAS_LCD_CONTROLLER
+
+
 #include "../kybos.h"
 #include GENERATE_HAL_INCLUDE(STM32_FAMILY,)
 #include GENERATE_HAL_INCLUDE(STM32_FAMILY, _lcd)
@@ -25,5 +28,9 @@ private:
 	static Stm32LcdController* _instance;
 	LCD_HandleTypeDef _hlcd;
 };
+
+
+#endif // HAS_LCD_CONTROLLER
+
 
 #endif /* STM32LCDCONTROLLER_H_ */

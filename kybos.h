@@ -79,7 +79,11 @@
 
 
 
-
+#if defined (STM32L100xB) || defined (STM32L100xBA) || defined (STM32L100xC) ||\
+    defined (STM32L152xB) || defined (STM32L152xBA) || defined (STM32L152xC) || defined (STM32L152xCA) || defined (STM32L152xD) || defined (STM32L152xE) || defined (STM32L152xDX) ||\
+    defined (STM32L162xC) || defined (STM32L162xCA) || defined (STM32L162xD) || defined (STM32L162xE) || defined (STM32L162xDX)
+#define HAS_LCD_CONTROLLER
+#endif
 
 
 // This macro is used to generate include paths
