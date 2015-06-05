@@ -49,16 +49,18 @@ int Stm32LcdController::init()
 
 	_hlcd.Instance = LCD;
 	_hlcd.Init.Prescaler = LCD_PRESCALER_1;
-	_hlcd.Init.Divider = LCD_DIVIDER_31;
+	_hlcd.Init.Divider = LCD_DIVIDER_16;
 	_hlcd.Init.Duty = LCD_DUTY_1_4;
-	_hlcd.Init.Bias = LCD_BIAS_1_3;
+	_hlcd.Init.Bias = LCD_BIAS_1_4;
 	_hlcd.Init.VoltageSource = LCD_VOLTAGESOURCE_INTERNAL;
-	_hlcd.Init.Contrast = LCD_CONTRASTLEVEL_4;
+	_hlcd.Init.Contrast = LCD_CONTRASTLEVEL_3;
 	_hlcd.Init.DeadTime = LCD_DEADTIME_0;
-	_hlcd.Init.PulseOnDuration = LCD_PULSEONDURATION_4;
+	_hlcd.Init.PulseOnDuration = LCD_PULSEONDURATION_0;
 	_hlcd.Init.MuxSegment = LCD_MUXSEGMENT_ENABLE;
 	_hlcd.Init.BlinkMode = LCD_BLINKMODE_OFF;
-	_hlcd.Init.BlinkFrequency = LCD_BLINKFREQUENCY_DIV32;
+	_hlcd.Init.BlinkFrequency = LCD_BLINKFREQUENCY_DIV8;
+	_hlcd.Init.HighDrive = LCD_HIGHDRIVE_0;
+	_hlcd.State = HAL_LCD_STATE_RESET;
 	status = HAL_LCD_Init(&_hlcd);
 
 	if (status == HAL_OK) {
@@ -106,8 +108,6 @@ void HAL_LCD_MspInit(LCD_HandleTypeDef* hlcd)
 	    PA9     ------> LCD_COM1
 	    PA10     ------> LCD_COM2
 	    PA15     ------> LCD_SEG17
-	    PC10     ------> LCD_SEG40
-	    PC11     ------> LCD_SEG41
 	    PB3     ------> LCD_SEG7
 	    PB4     ------> LCD_SEG8
 	    PB5     ------> LCD_SEG9
@@ -115,8 +115,7 @@ void HAL_LCD_MspInit(LCD_HandleTypeDef* hlcd)
 	    PB9     ------> LCD_COM3
 	    */
 	    GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
-	                          |GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9
-	                          |GPIO_PIN_10|GPIO_PIN_11;
+	                          |GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9;
 	    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 	    GPIO_InitStruct.Pull = GPIO_NOPULL;
 	    GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
@@ -139,6 +138,7 @@ void HAL_LCD_MspInit(LCD_HandleTypeDef* hlcd)
 	    GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
 	    GPIO_InitStruct.Alternate = GPIO_AF11_LCD;
 	    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
 
 	  /* USER CODE BEGIN LCD_MspInit 1 */
 
@@ -208,6 +208,28 @@ void HAL_LCD_MspDeInit(LCD_HandleTypeDef* hlcd)
 
 
 }
+
+
+int Stm32LcdController::putChar(uint8_t idx, uint32_t ch)
+{
+	HAL_StatusTypeDef status = HAL_ERROR;
+
+	if (idx >= LCD_RAM_REGISTER0 && idx <= LCD_RAM_REGISTER15) {
+		status = HAL_LCD_Write(&_hlcd, idx, 0xffff, ch);
+		if (status != HAL_OK) {
+			return -status;
+		}
+		status = HAL_LCD_UpdateDisplayRequest(&_hlcd);
+	}
+
+	if (status != HAL_OK) {
+		return -status;
+	}
+	else {
+		return 1;
+	}
+}
+
 
 Stm32LcdController::Stm32LcdController()
 {

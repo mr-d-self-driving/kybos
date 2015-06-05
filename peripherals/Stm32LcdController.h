@@ -23,6 +23,7 @@ class Stm32LcdController
 public:
 	static Stm32LcdController* getInstance();
 	int setup();
+	int putChar(uint8_t idx, uint32_t ch);
 private:
 	int init();
 	Stm32LcdController();
