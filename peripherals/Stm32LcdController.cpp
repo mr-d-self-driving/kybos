@@ -46,19 +46,18 @@ int Stm32LcdController::init()
 	__GPIOA_CLK_ENABLE();
 	__GPIOB_CLK_ENABLE();
 
-
 	_hlcd.Instance = LCD;
 	_hlcd.Init.Prescaler = LCD_PRESCALER_1;
-	_hlcd.Init.Divider = LCD_DIVIDER_16;
+	_hlcd.Init.Divider = LCD_DIVIDER_31;
 	_hlcd.Init.Duty = LCD_DUTY_1_4;
-	_hlcd.Init.Bias = LCD_BIAS_1_4;
+	_hlcd.Init.Bias = LCD_BIAS_1_3;
 	_hlcd.Init.VoltageSource = LCD_VOLTAGESOURCE_INTERNAL;
-	_hlcd.Init.Contrast = LCD_CONTRASTLEVEL_3;
+	_hlcd.Init.Contrast = LCD_CONTRASTLEVEL_4;
 	_hlcd.Init.DeadTime = LCD_DEADTIME_0;
-	_hlcd.Init.PulseOnDuration = LCD_PULSEONDURATION_0;
+	_hlcd.Init.PulseOnDuration = LCD_PULSEONDURATION_4;
 	_hlcd.Init.MuxSegment = LCD_MUXSEGMENT_ENABLE;
 	_hlcd.Init.BlinkMode = LCD_BLINKMODE_OFF;
-	_hlcd.Init.BlinkFrequency = LCD_BLINKFREQUENCY_DIV8;
+	_hlcd.Init.BlinkFrequency = LCD_BLINKFREQUENCY_DIV32;
 	_hlcd.Init.HighDrive = LCD_HIGHDRIVE_0;
 	_hlcd.State = HAL_LCD_STATE_RESET;
 	status = HAL_LCD_Init(&_hlcd);
@@ -77,73 +76,76 @@ extern "C" {
 void HAL_LCD_MspInit(LCD_HandleTypeDef* hlcd)
 {
 
-	  GPIO_InitTypeDef GPIO_InitStruct;
-	  if(hlcd->Instance==LCD)
-	  {
-	  /* USER CODE BEGIN LCD_MspInit 0 */
+	GPIO_InitTypeDef GPIO_InitStruct;
+	if(hlcd->Instance==LCD)
+	{
+		/* USER CODE BEGIN LCD_MspInit 0 */
 
-	  /* USER CODE END LCD_MspInit 0 */
-	    /* Peripheral clock enable */
-	    __LCD_CLK_ENABLE();
+		/* USER CODE END LCD_MspInit 0 */
+		/* Peripheral clock enable */
+		__LCD_CLK_ENABLE();
 
-	    /**LCD GPIO Configuration
-	    PC0     ------> LCD_SEG18
-	    PC1     ------> LCD_SEG19
-	    PC2     ------> LCD_SEG20
-	    PC3     ------> LCD_SEG21
-	    PA1     ------> LCD_SEG0
-	    PA2     ------> LCD_SEG1
-	    PA3     ------> LCD_SEG2
-	    PB10     ------> LCD_SEG10
-	    PB11     ------> LCD_SEG11
-	    PB12     ------> LCD_SEG12
-	    PB13     ------> LCD_SEG13
-	    PB14     ------> LCD_SEG14
-	    PB15     ------> LCD_SEG15
-	    PC6     ------> LCD_SEG24
-	    PC7     ------> LCD_SEG25
-	    PC8     ------> LCD_SEG26
-	    PC9     ------> LCD_SEG27
-	    PA8     ------> LCD_COM0
-	    PA9     ------> LCD_COM1
-	    PA10     ------> LCD_COM2
-	    PA15     ------> LCD_SEG17
-	    PB3     ------> LCD_SEG7
-	    PB4     ------> LCD_SEG8
-	    PB5     ------> LCD_SEG9
-	    PB8     ------> LCD_SEG16
-	    PB9     ------> LCD_COM3
-	    */
-	    GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
-	                          |GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9;
-	    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-	    GPIO_InitStruct.Pull = GPIO_NOPULL;
-	    GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
-	    GPIO_InitStruct.Alternate = GPIO_AF11_LCD;
-	    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+		/**LCD GPIO Configuration
+		PC0     ------> LCD_SEG18
+		PC1     ------> LCD_SEG19
+		PC2     ------> LCD_SEG20
+		PC3     ------> LCD_SEG21
+		PA1     ------> LCD_SEG0
+		PA2     ------> LCD_SEG1
+		PA3     ------> LCD_SEG2
+		PB10     ------> LCD_SEG10
+		PB11     ------> LCD_SEG11
+		PB12     ------> LCD_SEG12
+		PB13     ------> LCD_SEG13
+		PB14     ------> LCD_SEG14
+		PB15     ------> LCD_SEG15
+		PC6     ------> LCD_SEG24
+		PC7     ------> LCD_SEG25
+		PC8     ------> LCD_SEG26
+		PC9     ------> LCD_SEG27
+		PA8     ------> LCD_COM0
+		PA9     ------> LCD_COM1
+		PA10     ------> LCD_COM2
+		PA15     ------> LCD_SEG17
+		PC10     ------> LCD_SEG40
+		PC11     ------> LCD_SEG41
+		PB3     ------> LCD_SEG7
+		PB4     ------> LCD_SEG8
+		PB5     ------> LCD_SEG9
+		PB8     ------> LCD_SEG16
+		PB9     ------> LCD_COM3
+		 */
+		GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3
+				|GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9
+				|GPIO_PIN_10|GPIO_PIN_11;
+		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+		GPIO_InitStruct.Pull = GPIO_NOPULL;
+		GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
+		GPIO_InitStruct.Alternate = GPIO_AF11_LCD;
+		HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-	    GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_8
-	                          |GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_15;
-	    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-	    GPIO_InitStruct.Pull = GPIO_NOPULL;
-	    GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
-	    GPIO_InitStruct.Alternate = GPIO_AF11_LCD;
-	    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+		GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_8
+				|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_15;
+		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+		GPIO_InitStruct.Pull = GPIO_NOPULL;
+		GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
+		GPIO_InitStruct.Alternate = GPIO_AF11_LCD;
+		HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-	    GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13
-	                          |GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_3|GPIO_PIN_4
-	                          |GPIO_PIN_5|GPIO_PIN_8|GPIO_PIN_9;
-	    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-	    GPIO_InitStruct.Pull = GPIO_NOPULL;
-	    GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
-	    GPIO_InitStruct.Alternate = GPIO_AF11_LCD;
-	    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+		GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13
+				|GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_3|GPIO_PIN_4
+				|GPIO_PIN_5|GPIO_PIN_8|GPIO_PIN_9;
+		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+		GPIO_InitStruct.Pull = GPIO_NOPULL;
+		GPIO_InitStruct.Speed = GPIO_SPEED_VERY_LOW;
+		GPIO_InitStruct.Alternate = GPIO_AF11_LCD;
+		HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 
-	  /* USER CODE BEGIN LCD_MspInit 1 */
+		/* USER CODE BEGIN LCD_MspInit 1 */
 
-	  /* USER CODE END LCD_MspInit 1 */
-	  }
+		/* USER CODE END LCD_MspInit 1 */
+	}
 
 }
 
@@ -210,17 +212,26 @@ void HAL_LCD_MspDeInit(LCD_HandleTypeDef* hlcd)
 }
 
 
-int Stm32LcdController::putChar(uint8_t idx, uint32_t ch)
+int Stm32LcdController::writeData(uint32_t RAMRegisterIndex, uint32_t RAMRegisterMask, uint32_t Data)
 {
-	HAL_StatusTypeDef status = HAL_ERROR;
+	HAL_StatusTypeDef status;
 
-	if (idx >= LCD_RAM_REGISTER0 && idx <= LCD_RAM_REGISTER15) {
-		status = HAL_LCD_Write(&_hlcd, idx, 0xffff, ch);
-		if (status != HAL_OK) {
-			return -status;
-		}
-		status = HAL_LCD_UpdateDisplayRequest(&_hlcd);
+	status = HAL_LCD_Write(&_hlcd, RAMRegisterIndex, RAMRegisterMask, Data);
+
+	if (status != HAL_OK) {
+		return -status;
 	}
+	else {
+		return 1;
+	}
+}
+
+
+int Stm32LcdController::update()
+{
+	HAL_StatusTypeDef status;
+
+	status = HAL_LCD_UpdateDisplayRequest(&_hlcd);
 
 	if (status != HAL_OK) {
 		return -status;
