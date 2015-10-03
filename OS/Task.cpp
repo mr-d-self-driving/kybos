@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <cmsis_os.h>
+//#include <cmsis_os.h>
 
 
 void taskfunwrapper(void* parm) {
@@ -101,15 +101,18 @@ void Task::yield()
 	taskYIELD();
 }
 
+/*
 void Task::yieldFromISR()
 {
 	//vPortYieldFromISR();
 	//vPortYield(); //FIXME!
 	osThreadYield(); // FIXME!
+
 }
+*/
 
 void Task::delay_ms(uint32_t delay) {
-	osDelay(delay);
+	vTaskDelay(delay / portTICK_PERIOD_MS);
 }
 
 void Task::delay_ticks(uint32_t delay) {
@@ -118,12 +121,12 @@ void Task::delay_ticks(uint32_t delay) {
 
 uint32_t Task::getTime()
 {
-	return osKernelSysTick();
+	return (portTICK_PERIOD_MS * xTaskGetTickCount());
 }
 
 uint32_t Task::getSysticks()
 {
-	return osKernelSysTick();
+	return xTaskGetTickCount();
 }
 
 void Task::setPriority(uint8_t priority)

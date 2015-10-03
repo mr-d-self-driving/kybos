@@ -32,7 +32,7 @@
 #include GENERATE_HAL_INCLUDE(STM32_FAMILY, _pwr)
 //#include "stm32l1xx_hal_flash.h"
 #include GENERATE_HAL_INCLUDE(STM32_FAMILY, _flash)
-#include "cmsis_os.h"
+//#include "cmsis_os.h"
 
 
 extern "C" {
@@ -47,12 +47,13 @@ extern "C" {
 
 
 // must be implemented outside of kybos, i.e. in the application code
-extern void SystemClock_Config(void);
 
 
 #include "../src/MainTask.h"
 
 extern "C" {
+
+	extern void SystemClock_Config(void);
 
 	void vApplicationStackOverflowHook( xTaskHandle *pxTask, signed char *pcTaskName )
 	{
@@ -80,6 +81,22 @@ extern "C" {
 	extern void xPortPendSVHandler(void);
 	extern void xPortSysTickHandler( void );
 
+
+	void EndIdleMonitor(void) { }
+	void StartIdleMonitor(void) { }
+
+	void SysTick_Handler( void )
+	{
+		HAL_IncTick();
+		xPortSysTickHandler();
+	}
+
+	void vApplicationIdleHook( void )
+	{
+
+	}
+
+
 }
 
 
@@ -97,7 +114,9 @@ int main(void)
 
 	MainTask *mt = new MainTask();
 	mt->run();
-	osKernelStart(NULL, NULL);
+	//osKernelStart(NULL, NULL);
+	vTaskStartScheduler();
+
 
 	while(1) { ; } // Just in case...
 
