@@ -46,13 +46,13 @@ extern "C" {
 }
 
 
-// must be implemented outside of kybos, i.e. in the application code
 
 
 #include "../src/MainTask.h"
 
 extern "C" {
 
+	// must be implemented outside of kybos, i.e. in the application code
 	extern void SystemClock_Config(void);
 
 	void vApplicationStackOverflowHook( xTaskHandle *pxTask, signed char *pcTaskName )
@@ -98,8 +98,6 @@ extern "C" {
 
 
 }
-
-
 
 
 int main(void)
