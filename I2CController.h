@@ -13,6 +13,8 @@
 #include "OS/RecursiveMutex.h"
 #include "GPIO.h"
 
+#ifdef  HAL_I2C_MODULE_ENABLED
+
 class I2CController {
 public:
 	typedef enum {I2CController1, I2CController2, numI2CControllers} i2cController_t;
@@ -38,5 +40,7 @@ private:
 	i2cController_t _controller;
 
 };
+
+#endif // HAL_I2C_MODULE_ENABLED
 
 #endif /* KYBOS_I2CCONTROLLER_H_ */

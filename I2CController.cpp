@@ -27,12 +27,15 @@
 //#include <stm32l1xx_hal_def.h>
 #include GENERATE_HAL_INCLUDE(STM32_FAMILY, _def)
 //#include <stm32l1xx_hal_i2c.h>
+#include GENERATE_HAL_INCLUDE(STM32_FAMILY, _dma)
 #include GENERATE_HAL_INCLUDE(STM32_FAMILY, _i2c)
 
 #include <cmsis_device.h>
 
 //#include <stm32l1xx_hal_gpio_ex.h> // For GPIO AF macros
 #include "GPIO.h"
+
+#ifdef HAL_I2C_MODULE_ENABLED
 
 I2CController* I2CController::_i2cControllers[] = {0, 0};
 
@@ -187,4 +190,7 @@ I2CController* I2CController::init(i2cController_t controller)
 	I2CController* c = new I2CController(controller);
 	return c;
 }
+
+#endif // HAL_I2C_MODULE_ENABLED
+
 

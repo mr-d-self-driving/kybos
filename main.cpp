@@ -34,6 +34,8 @@
 #include GENERATE_HAL_INCLUDE(STM32_FAMILY, _flash)
 //#include "cmsis_os.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 extern "C" {
 	void __attribute__((naked))
@@ -45,6 +47,7 @@ extern "C" {
 	}
 }
 
+#pragma GCC diagnostic pop
 
 
 

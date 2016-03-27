@@ -122,6 +122,14 @@ private:
 	GPIOPin(uint8_t port, uint8_t pin);
 
 	uint8_t _portPin;
+
+public:
+
+	void mapAsCAN1RX();
+	void mapAsCAN1TX();
+	void mapAsCAN2RX();
+	void mapAsCAN2TX();
+
 };
 
 
