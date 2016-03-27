@@ -24,7 +24,7 @@
 
 #ifndef TJA10XX_H_
 #define TJA10XX_H_
-#include <openstella/GPIO.h>
+#include "../GPIO.h"
 
 class Tja10xx {
 private:

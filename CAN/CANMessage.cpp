@@ -36,29 +36,29 @@ CANMessage::CANMessage(uint32_t id, uint8_t dlc)
 
 bool CANMessage::isExtendedId()
 {
-	return (_flags & MSG_OBJ_EXTENDED_ID) != 0;
+	return (_flags & CAN_ID_EXT) != 0;
 }
 
 void CANMessage::setExtendedId(bool extended)
 {
 	if (extended) {
-		_flags |= MSG_OBJ_EXTENDED_ID;
+		_flags |= CAN_ID_EXT;
 	} else {
-		_flags &= ~MSG_OBJ_EXTENDED_ID;
+		_flags &= ~CAN_ID_EXT;
 	}
 }
 
 bool CANMessage::isRemoteFrame()
 {
-	return (_flags & MSG_OBJ_REMOTE_FRAME) != 0;
+	return (_flags & CAN_RTR_REMOTE) != 0;
 }
 
 void CANMessage::setRemoteFrame(bool remote)
 {
 	if (remote) {
-		_flags |= MSG_OBJ_REMOTE_FRAME;
+		_flags |= CAN_RTR_REMOTE;
 	} else {
-		_flags &= ~MSG_OBJ_REMOTE_FRAME;
+		_flags &= ~CAN_RTR_REMOTE;
 	}
 }
 

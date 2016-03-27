@@ -23,7 +23,7 @@
 
 
 #include "Tja10xx.h"
-#include <openstella/OS/Task.h>
+#include "../OS/Task.h"
 
 
 
