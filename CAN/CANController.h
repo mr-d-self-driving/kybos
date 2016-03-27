@@ -108,6 +108,7 @@ class CANController : public Task
 		void disableInterrupts(uint32_t interruptFlags);
 		void handleInterrupt();
 		//void notifyObservers(tCANMsgObject *obj);
+		void notifyObservers(CanRxMsgTypeDef *msgHndle);
 
 		observer_list_t *createObserverListFragment();
 

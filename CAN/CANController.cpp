@@ -21,12 +21,18 @@
  *
  */
 
+#include "../kybos.h"
+
+#include GENERATE_HAL_INCLUDE(STM32_FAMILY,)
+#include GENERATE_HAL_INCLUDE(STM32_FAMILY, _rcc)
+#include GENERATE_HAL_INCLUDE(STM32_FAMILY, _rcc_ex)
+#include GENERATE_HAL_INCLUDE(STM32_FAMILY, _can)
+
 #include "CANController.h"
-
 #include <string.h>
-
 #include "../OS/Mutex.h"
 
+#ifdef HAL_CAN_MODULE_ENABLED
 
 void CAN0IntHandler(void) {
 	CANController::_controllers[0]->handleInterrupt();
@@ -45,27 +51,17 @@ void CAN2IntHandler(void) {
 
 
 CANController::CANController(CAN::channel_t channel, uint32_t periph, uint32_t base) :
-	Task(0, CANCONTROLLER_STACK_SIZE),
+	Task(0, 160),
 	_channel(channel),
-	_periph(periph),
-	_base(base),
 	_observerMutex(),
 	_lastMessageReceivedTimestamp(0),
 	_silent(false),
 	_timeToWaitForFreeMob(100),
 	_bitrate(CAN::bitrate_500kBit),
-	_pool(100),
-	_freeSwMobs(OPENSTELLA_CANCONTROLLER_QUEUESIZE),
-	_usedSwMobs(OPENSTELLA_CANCONTROLLER_QUEUESIZE)
+	_pool(100)
 {
-	static const char* tasknames[3] = { "can0", "can1", "can2" };
+	static const char* tasknames[3] = { "can1", "can2" };
 	setTaskName(tasknames[channel]);
-
-	int n = sizeof(_swmobs)/sizeof(_swmobs[0]);
-	for (int i=0; i<n; i++) {
-		_freeSwMobs.sendToBack(i);
-		_swmobs[i].pucMsgData = _swMobsData[i];
-	}
 
 	_observers = createObserverListFragment();
 }
@@ -77,78 +73,14 @@ CANController::observer_list_t *CANController::createObserverListFragment()
 	return result;
 }
 
-void CANController::disableInterrupts(uint32_t interruptFlags)
-{
-	MAP_CANIntDisable(_base, interruptFlags);
-}
-
 void CANController::setBitrate(CAN::bitrate_t bitrate)
 {
-	_bitrate = bitrate;
-	MAP_CANBitRateSet(_base, MAP_SysCtlClockGet(), bitrate);
+	// TODO FIXME: not implemented yet!
 }
 
 void CANController::setup(CAN::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpin)
 {
-	rxpin.getPort()->enablePeripheral();
-	txpin.getPort()->enablePeripheral();
-
-	rxpin.configure(GPIOPin::CAN);
-	txpin.configure(GPIOPin::CAN);
-
-	switch (_channel) {
-#ifdef HAS_CAN_CHANNEL_0
-		case CAN::channel_0:
-			rxpin.mapAsCAN0RX();
-			txpin.mapAsCAN0TX();
-			break;
-#endif
-#ifdef HAS_CAN_CHANNEL_1
-		case CAN::channel_1:
-			rxpin.mapAsCAN1RX();
-			txpin.mapAsCAN1TX();
-			break;
-#endif
-#ifdef HAS_CAN_CHANNEL_2
-		case CAN::channel_2:
-			rxpin.mapAsCAN2RX();
-			txpin.mapAsCAN2TX();
-			break;
-#endif
-		default:
-			while (1) { ; } // something bad happened ...
-			break;
-	}
-
-
-	MAP_SysCtlPeripheralEnable(_periph);
-
-	MAP_CANInit(_base);
-	setBitrate(bitrate);
-	enableInterrupts(CAN_INT_MASTER | CAN_INT_ERROR | CAN_INT_STATUS);
-
-	for (int i=0; i<16; i++)
-	{
-		/*
-		CANMessageObject *o = getMessageObject(i);
-		o->id = 0;
-		o->mask = 0;
-		o->dlc = 8;
-		o->setRxIntEnabled(i<10);
-		o->setPartOfFIFO(i<9);
-		o->setUseIdFilter(i<10);
-		o->set(CAN::message_type_rx);
-		*/
-		tCANMsgObject msgobj;
-		msgobj.ulMsgID = 0;
-		msgobj.ulMsgIDMask = 0;
-		msgobj.ulMsgLen = 8;
-		msgobj.pucMsgData = 0;
-		msgobj.ulFlags = MSG_OBJ_RX_INT_ENABLE | MSG_OBJ_USE_ID_FILTER | ((i<15)?MSG_OBJ_FIFO:0);
-		MAP_CANMessageSet(_base, i+1, &msgobj, MSG_OBJ_TYPE_RX);
-	}
-
-	MAP_CANEnable(_base);
+	// TODO FIXME: not implemented yet!
 }
 
 void CANController::execute()
@@ -156,72 +88,19 @@ void CANController::execute()
 	while(1) {
 		uint8_t num;
 
+		/*
 		while (_usedSwMobs.receive(&num, 0)) {
 			tCANMsgObject *msgobj = &_swmobs[num];
 			_lastMessageReceivedTimestamp = getTime();
 			notifyObservers(msgobj);
 			_freeSwMobs.sendToBack(num);
 		}
+		*/
 
 		uint32_t timeToWait = sendCyclicCANMessages();
 		if (timeToWait>100) timeToWait = 100;
 
 		_usedSwMobs.peek(&num, timeToWait);
-
-		/*
-		_isrToThreadQueue.peek(&num, timeToWait);
-
-		uint32_t status = getControlRegister(); // also clears the interrupt
-		if (status & 0xE0) { // bus off, error warning level or error passive
-			MAP_CANDisable(_base);
-			delay_ms(10);
-
-			MAP_CANInit(_base);
-			setBitrate(_bitrate);
-			enableInterrupts(CAN_INT_MASTER | CAN_INT_ERROR | CAN_INT_STATUS);
-
-			for (int i=0; i<32; i++)
-			{
-				CANMessageObject *o = getMessageObject(i);
-				o->id = 0;
-				o->mask = 0;
-				o->dlc = 8;
-				o->setRxIntEnabled(i<10);
-				o->setPartOfFIFO(i<9);
-				o->setUseIdFilter(i<10);
-				o->set(CAN::message_type_rx);
-			}
-
-			MAP_CANEnable(_base);
-		}
-
-		*/
-		uint32_t status = getControlRegister(); // also clears the interrupt
-		if (status & 0xA0) { // bus off, error warning level or error passive
-			bool s = _silent;
-			_silent = true;
-			MAP_CANDisable(_base);
-			delay_ms(10);
-
-			MAP_CANInit(_base);
-			setBitrate(_bitrate);
-			enableInterrupts(CAN_INT_MASTER | CAN_INT_ERROR | CAN_INT_STATUS);
-
-			for (int i=0; i<16; i++)
-			{
-				tCANMsgObject msgobj;
-				msgobj.ulMsgID = 0;
-				msgobj.ulMsgIDMask = 0;
-				msgobj.ulMsgLen = 8;
-				msgobj.pucMsgData = 0;
-				msgobj.ulFlags = MSG_OBJ_RX_INT_ENABLE | MSG_OBJ_USE_ID_FILTER | ((i<15)?MSG_OBJ_FIFO:0);
-				MAP_CANMessageSet(_base, i+1, &msgobj, MSG_OBJ_TYPE_RX);
-			}
-			MAP_CANEnable(_base);
-			delay_ms(10);
-			_silent = s;
-
-		}
 
 	}
 }
@@ -229,6 +108,7 @@ void CANController::execute()
 
 void CANController::handleInterrupt()
 {
+#if 0
 	uint32_t cause = MAP_CANIntStatus(_base, CAN_INT_STS_CAUSE);
 	if (cause == CAN_INT_INTID_STATUS) // status interrupt. error occurred?
 	{
@@ -254,6 +134,7 @@ void CANController::handleInterrupt()
 			CANIntClear(_base, cause);
 		}
 	}
+#endif
 }
 
 /*
@@ -270,99 +151,32 @@ CANMessageObject* CANController::getMessageObject(uint8_t mob_id)
 
 void CANController::enableInterrupts(uint32_t interruptFlags)
 {
-	unsigned long INT;
-	switch (_channel) {
-#ifdef HAS_CAN_CHANNEL_0
-		case CAN::channel_0:
-			INT = INT_CAN0;
-			break;
-#endif
-#ifdef HAS_CAN_CHANNEL_1
-		case CAN::channel_1:
-			INT = INT_CAN1;
-			break;
-#endif
-#ifdef HAS_CAN_CHANNEL_2
-		case CAN::channel_2:
-			INT = INT_CAN2;
-			break;
-#endif
-		default:
-			while(1);
-			break;
-	}
-	MAP_CANIntEnable(_base, interruptFlags);
-	MAP_IntPrioritySet(INT, configDEFAULT_SYSCALL_INTERRUPT_PRIORITY);
-	IntEnable(INT);
-}
-
-uint32_t CANController::getControlRegister()
-{
-	return MAP_CANStatusGet(_base, CAN_STS_CONTROL);
-}
-
-uint32_t CANController::getTxRequestRegister()
-{
-	return MAP_CANStatusGet(_base, CAN_STS_TXREQUEST);
-}
-
-uint32_t CANController::getNewDataRegister()
-{
-	return MAP_CANStatusGet(_base, CAN_STS_NEWDAT);
-}
-
-uint32_t CANController::getMobEnabledRegister()
-{
-	return MAP_CANStatusGet(_base, CAN_STS_MSGVAL);
+	// TODO FIXME: not yet implemented
 }
 
 void CANController::enable()
 {
-	MAP_CANEnable(_base);
 	run();
 }
 
 void CANController::disable()
 {
 	stop();
-	MAP_CANDisable(_base);
 }
 
-bool CANController::isAutomaticRetransmission()
-{
-	return MAP_CANRetryGet(_base);
-}
-
-void CANController::setAutomaticRetransmission(bool retransmit)
-{
-	MAP_CANRetrySet(_base, retransmit);
-}
 
 CAN::error_counters_t CANController::getErrorCounters()
 {
-	CAN::error_counters_t result;
-	result.passiveLimitReached = MAP_CANErrCntrGet(_base, &result.rx_errors, &result.tx_errors);
+	CAN::error_counters_t result = { 0, 0, false};
+
+	// TODO FIXME: to be implemented
 	return result;
 }
 
-uint8_t CANController::findFreeSendingMOB()
-{
-	for (uint8_t i=0; i<=_timeToWaitForFreeMob; i++) {
-		uint32_t txPendingStatus = getTxRequestRegister();
-		for (uint8_t i=31; i>15; i--) {
-			if ( (txPendingStatus & (1<<i)) == 0 ) { // mailbox i is free?
-				return i;
-			}
-		}
-		if (_timeToWaitForFreeMob>0) {
-			delay_ms(1);
-		}
-	}
-	return 0;
-}
 
 bool CANController::sendMessage(CANMessage *msg)
 {
+#if 0
 	MutexGuard guard(&_sendMessageMutex);
 
 	if (_silent) return true;
@@ -386,7 +200,7 @@ bool CANController::sendMessage(CANMessage *msg)
 	} else {
 		return false;
 	}
-
+#endif
 }
 
 CANController *CANController::_controllers[3] = {0, 0, 0};
@@ -431,13 +245,13 @@ CANController *CANController::get(CAN::channel_t channel)
 				break;
 		}
 		_controllers[channel] = new CANController(channel, periph, base);
-		CANIntRegister(base, handler);
+		//CANIntRegister(base, handler);
 	}
 
 	return _controllers[channel];
 }
 
-void CANController::notifyObservers(tCANMsgObject *obj)
+void CANController::notifyObservers(CanRxMsgTypeDef *msgHndle)
 {
 	MutexGuard guard(&_observerMutex);
 
@@ -447,17 +261,17 @@ void CANController::notifyObservers(tCANMsgObject *obj)
 			observer_list_entry_t *entry = &list->entries[i];
 			if (!entry->observer) continue;
 
-
-			if ( (obj->ulMsgID & entry->mask) == (entry->can_id & entry->mask) )
+			uint32_t canid = ((msgHndle->IDE)==CAN_ID_EXT)?msgHndle->ExtId:msgHndle->StdId;
+			if ( (canid & entry->mask) == (entry->can_id & entry->mask) )
 			{
 				// match. notify the observer.
 				CANMessage *msg = _pool.getMessage();
 				if (msg) {
-					msg->_flags = obj->ulFlags & (MSG_OBJ_EXTENDED_ID | MSG_OBJ_REMOTE_FRAME);
+					msg->_flags  = msgHndle->IDE | msgHndle->RTR;
 					msg->_receivingController = this;
-					msg->id = obj->ulMsgID;
-					msg->dlc = obj->ulMsgLen;
-					memcpy(msg->data, obj->pucMsgData, sizeof(msg->data));
+					msg->id = canid;
+					msg->dlc = msgHndle->DLC;
+					memcpy(msg->data, msgHndle->Data, sizeof(msg->data));
 
 
 					if (!entry->observer->notifyCANMessage(msg)) {
@@ -753,5 +567,9 @@ void CANController::setTimeToWaitForFreeMob(uint32_t ms_to_wait)
 {
 	_timeToWaitForFreeMob = ms_to_wait;
 }
+
+#endif // HAL_CAN_MODULE_ENABLED
+
+
 
 
