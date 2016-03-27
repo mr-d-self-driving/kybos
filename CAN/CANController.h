@@ -103,7 +103,7 @@ class CANController : public Task
 		CANMessagePool _pool;
 		Mutex _sendMessageMutex;
 
-		CANController(CAN::channel_t channel, uint32_t periph, uint32_t base);
+		CANController(CAN::channel_t channel);
 		void enableInterrupts(uint32_t interruptFlags);
 		void disableInterrupts(uint32_t interruptFlags);
 		void handleInterrupt();

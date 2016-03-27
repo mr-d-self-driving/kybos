@@ -50,7 +50,7 @@ void CAN2IntHandler(void) {
 
 
 
-CANController::CANController(CAN::channel_t channel, uint32_t periph, uint32_t base) :
+CANController::CANController(CAN::channel_t channel) :
 	Task(0, 160),
 	_channel(channel),
 	_observerMutex(),
@@ -81,10 +81,12 @@ void CANController::setBitrate(CAN::bitrate_t bitrate)
 void CANController::setup(CAN::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpin)
 {
 	switch(_channel) {
-	case CAN::channel_1:
+	case CAN::can_channel_1:
 		break;
-	case CAN::channel_2:
+	case CAN::can_channel_2:
 		break;
+	default:
+		while(1) {;}
 	}
 
 }
@@ -207,6 +209,8 @@ bool CANController::sendMessage(CANMessage *msg)
 		return false;
 	}
 #endif
+
+	return false;
 }
 
 CANController *CANController::_controllers[CAN::num_can_channels] = {0,};
@@ -217,9 +221,6 @@ CANController *CANController::get(CAN::channel_t channel)
 
 	if (!_controllers[channel])
 	{
-		uint32_t base;
-		uint32_t periph;
-		void (*handler)(void);
 		switch (channel) {
 
 #ifdef HAS_CAN_CHANNEL_1
@@ -239,7 +240,7 @@ CANController *CANController::get(CAN::channel_t channel)
 				while(1);
 				break;
 		}
-		_controllers[channel] = new CANController(channel, periph, base);
+		_controllers[channel] = new CANController(channel);
 	}
 
 	return _controllers[channel];
