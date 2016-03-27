@@ -80,7 +80,7 @@ class CANController : public Task
 
 		FragmentedList<CANCyclicMessage,10> _cyclicMessages;
 
-		static CANController *_controllers[3];
+		static CANController *_controllers[CAN::num_can_channels];
 
 		CAN::channel_t _channel;
 		uint32_t _periph;

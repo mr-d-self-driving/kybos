@@ -80,7 +80,13 @@ void CANController::setBitrate(CAN::bitrate_t bitrate)
 
 void CANController::setup(CAN::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpin)
 {
-	// TODO FIXME: not implemented yet!
+	switch(_channel) {
+	case CAN::channel_1:
+		break;
+	case CAN::channel_2:
+		break;
+	}
+
 }
 
 void CANController::execute()
@@ -203,7 +209,7 @@ bool CANController::sendMessage(CANMessage *msg)
 #endif
 }
 
-CANController *CANController::_controllers[3] = {0, 0, 0};
+CANController *CANController::_controllers[CAN::num_can_channels] = {0,};
 CANController *CANController::get(CAN::channel_t channel)
 {
 	static Mutex _mutex;
@@ -216,27 +222,16 @@ CANController *CANController::get(CAN::channel_t channel)
 		void (*handler)(void);
 		switch (channel) {
 
-#ifdef HAS_CAN_CHANNEL_0
-			case CAN::channel_0:
-				base = CAN0_BASE;
-				periph = SYSCTL_PERIPH_CAN0;
-				handler = CAN0IntHandler;
-				break;
-#endif
-
 #ifdef HAS_CAN_CHANNEL_1
-			case CAN::channel_1:
-				base = CAN1_BASE;
-				periph = SYSCTL_PERIPH_CAN1;
-				handler = CAN1IntHandler;
+			case CAN::can_channel_1:
+				__HAL_RCC_CAN1_CLK_ENABLE();
 				break;
 #endif
 
 #ifdef HAS_CAN_CHANNEL_2
-			case CAN::channel_2:
-				base = CAN2_BASE;
-				periph = SYSCTL_PERIPH_CAN2;
-				handler = CAN2IntHandler;
+			case CAN::can_channel_2:
+				__HAL_RCC_CAN1_CLK_ENABLE(); // For CAN2, we need CAN1 clock also!
+				__HAL_RCC_CAN2_CLK_ENABLE();
 				break;
 #endif
 
@@ -245,7 +240,6 @@ CANController *CANController::get(CAN::channel_t channel)
 				break;
 		}
 		_controllers[channel] = new CANController(channel, periph, base);
-		//CANIntRegister(base, handler);
 	}
 
 	return _controllers[channel];
