@@ -118,23 +118,36 @@ int I2CController::setup(GPIOPin sda, GPIOPin scl)
 	RecursiveMutexGuard guard(&_lock);
 	int ret=1;
 
-	uint32_t af;
+	//uint32_t af;
 
 	switch (_controller) {
+#ifdef HAS_I2C1
 	case I2CController1:
-		af = GPIO_AF4_I2C1;
+		sda.mapAsI2C1SDA();
+		scl.mapAsI2C1SCL();
 		break;
+#endif
+#ifdef HAS_I2C2
 	case I2CController2:
-		af = GPIO_AF4_I2C2;
+		sda.mapAsI2C2SDA();
+		scl.mapAsI2C2SCL();
 		break;
+#endif
+#ifdef HAS_I2C3
+	case I2CController3:
+		sda.mapAsI2C3SDA();
+		scl.mapAsI2C3SCL();
+		break;
+#endif
+
 	default:
 		while (1) { ; } // something's really wrong!
 		break;
 
 	}
 
-	sda.configure(GPIOPin::GPIO_AF_OD, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, (GPIOPin::gpio_afconfig_t) af);
-	scl.configure(GPIOPin::GPIO_AF_OD, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, (GPIOPin::gpio_afconfig_t) af);
+	//sda.configure(GPIOPin::GPIO_AF_OD, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, (GPIOPin::gpio_afconfig_t) af);
+	//scl.configure(GPIOPin::GPIO_AF_OD, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, (GPIOPin::gpio_afconfig_t) af);
 
 	return ret;
 }

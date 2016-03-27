@@ -12,12 +12,25 @@
 #include <cmsis_device.h>
 #include "OS/RecursiveMutex.h"
 #include "GPIO.h"
+#include "kybos.h"
 
 #ifdef  HAL_I2C_MODULE_ENABLED
 
 class I2CController {
 public:
-	typedef enum {I2CController1, I2CController2, numI2CControllers} i2cController_t;
+	typedef enum {
+#ifdef HAS_I2C1
+		I2CController1,
+#endif
+#ifdef HAS_I2C2
+		I2CController2,
+#endif
+#ifdef HAS_I2C3
+		I2CController3,
+#endif
+		numI2CControllers
+	} i2cController_t;
+
 	typedef enum {I2C7bitMode, I2C10bitMode, I2CNumAdressingModes} i2cAddressingMode_t;
 	typedef enum {I2CModeMaster, I2CModeSlave} i2cMode_t;
 	int setup(GPIOPin sda, GPIOPin scl);

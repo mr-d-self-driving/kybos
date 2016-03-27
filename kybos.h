@@ -86,6 +86,12 @@
 #endif
 
 
+#if defined (STM32F429xx)
+	#define HAS_I2C1
+	#define HAS_I2C2
+	#define HAS_I2C3
+#endif
+
 // This macro is used to generate include paths
 // as HAL file names are generally based on the STM32 family's name
 // It's ugly, but it works

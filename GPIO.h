@@ -129,6 +129,13 @@ public:
 	void mapAsCAN1TX();
 	void mapAsCAN2RX();
 	void mapAsCAN2TX();
+	void mapAsI2C1SDA();
+	void mapAsI2C2SDA();
+	void mapAsI2C3SDA();
+	void mapAsI2C1SCL();
+	void mapAsI2C2SCL();
+	void mapAsI2C3SCL();
+
 
 };
 
