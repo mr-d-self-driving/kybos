@@ -83,7 +83,48 @@ CANController::observer_list_t *CANController::createObserverListFragment()
 
 void CANController::setBitrate(CAN::bitrate_t bitrate)
 {
-	// TODO FIXME: not implemented yet!
+	uint32_t pclk1 = HAL_RCC_GetPCLK1Freq();
+
+	switch (pclk1){
+	case 45000000:
+		_handle.Init.BS1 = CAN_BS1_10TQ; /* Set Sampling Point to 73.3 percent */
+		_handle.Init.BS2 = CAN_BS2_4TQ;  /* Set Sampling Point to 73.3 percent */
+		_handle.Init.SJW = CAN_SJW_2TQ;  /* Values 1-4 allowed */
+		switch (bitrate) {
+		case 100000:
+		case 125000:
+		case 250000:
+		case 500000:
+		case 1000000:
+			_handle.Init.Prescaler = pclk1/(bitrate*(1+10+4)); // Sync: 1Tq, BS1=10Tq, BS2=4Tq
+			break;
+		default:
+			while (1) { ; }
+		}
+
+		break;
+	case 42000000:
+		_handle.Init.BS1 = CAN_BS1_15TQ; /* Set Sampling Point to 76.2 percent */
+		_handle.Init.BS2 = CAN_BS2_5TQ;  /* Set Sampling Point to 76.2 percent */
+		_handle.Init.SJW = CAN_SJW_2TQ;  /* Values 1-4 allowed */
+		switch (bitrate) {
+		case 100000:
+		case 125000:
+		case 250000:
+		case 500000:
+		case 1000000:
+			_handle.Init.Prescaler = pclk1/(bitrate*(1+15+5)); // Sync: 1Tq, BS1=10Tq, BS2=4Tq
+			break;
+		default:
+			while (1) { ; }
+		}
+		break;
+	default: // not implemented yet!
+		while (1) { ; }
+	}
+
+
+
 }
 
 void CANController::setup(CAN::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpin)
@@ -116,14 +157,8 @@ void CANController::setup(CAN::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpin)
 	_handle.Init.AWUM = DISABLE;
 	_handle.Init.NART = DISABLE;
 	_handle.Init.ABOM = ENABLE;
-	_handle.Init.BS1 = CAN_BS1_10TQ; /* Set Sampling Point to 73.3 percent */
-	_handle.Init.BS2 = CAN_BS2_4TQ;  /* Set Sampling Point to 73.3 percent */
-	_handle.Init.SJW = CAN_SJW_1TQ;  /* Values 1-4 allowed */
 
-
-	/*
-	 TODO FIXME: bitrate configuration!
-	 */
+	setBitrate(bitrate);
 
 	_handle.Lock = HAL_UNLOCKED;
 	HAL_CAN_Init(&_handle);
