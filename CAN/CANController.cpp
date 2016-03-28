@@ -34,6 +34,7 @@
 
 #ifdef HAL_CAN_MODULE_ENABLED
 
+/*
 void CAN0IntHandler(void) {
 	CANController::_controllers[0]->handleInterrupt();
 }
@@ -45,9 +46,7 @@ void CAN1IntHandler(void) {
 void CAN2IntHandler(void) {
 	CANController::_controllers[2]->handleInterrupt();
 }
-
-
-
+*/
 
 
 CANController::CANController(CAN::channel_t channel) :
@@ -159,6 +158,10 @@ void CANController::setup(CAN::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpin)
 	_handle.Init.ABOM = ENABLE;
 	_handle.Init.Mode = CAN_MODE_NORMAL;
 
+	_handle.pRxMsg = &_rxMsg;
+	_handle.pTxMsg = &_txMsg;
+
+
 	setBitrate(bitrate);
 
 	_handle.Lock = HAL_UNLOCKED;
@@ -247,10 +250,6 @@ CANMessageObject* CANController::getMessageObject(uint8_t mob_id)
 }
 */
 
-void CANController::enableInterrupts(uint32_t interruptFlags)
-{
-	// TODO FIXME: not yet implemented
-}
 
 void CANController::enable()
 {
@@ -652,6 +651,7 @@ void CANController::setTimeToWaitForFreeMob(uint32_t ms_to_wait)
 {
 	_timeToWaitForFreeMob = ms_to_wait;
 }
+
 
 #endif // HAL_CAN_MODULE_ENABLED
 

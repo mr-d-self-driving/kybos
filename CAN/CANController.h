@@ -38,7 +38,6 @@
 #include "CANMessagePool.h"
 
 
-class CANMessageObject;
 class CANObserver;
 
 /**
@@ -57,11 +56,6 @@ class CANObserver;
 
 class CANController : public Task
 {
-	friend void CAN0IntHandler();
-	friend void CAN1IntHandler();
-	friend void CAN2IntHandler();
-	friend class CANMessageObject;
-
 	private:
 
 		static const uint8_t observer_list_length = 10;
@@ -84,6 +78,8 @@ class CANController : public Task
 
 		CAN::channel_t _channel;
 		CAN_HandleTypeDef _handle;
+		CanTxMsgTypeDef _txMsg;
+		CanRxMsgTypeDef _rxMsg;
 
 		uint8_t _swMobsData[16][8];
 		Queue<uint8_t> _freeSwMobs;
@@ -109,14 +105,12 @@ class CANController : public Task
 
 		observer_list_t *createObserverListFragment();
 
+/*
 		uint32_t getControlRegister();
 		uint32_t getTxRequestRegister();
 		uint32_t getNewDataRegister();
 		uint32_t getMobEnabledRegister();
-
-		uint8_t findFreeSendingMOB();
-
-		CANMessageObject* getMessageObject(uint8_t mob_id);
+*/
 
 		uint32_t sendCyclicCANMessages();
 
