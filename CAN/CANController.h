@@ -83,10 +83,8 @@ class CANController : public Task
 		static CANController *_controllers[CAN::num_can_channels];
 
 		CAN::channel_t _channel;
-		uint32_t _periph;
-		uint32_t _base;
+		CAN_HandleTypeDef _handle;
 
-		//tCANMsgObject _swmobs[16];
 		uint8_t _swMobsData[16][8];
 		Queue<uint8_t> _freeSwMobs;
 		Queue<uint8_t> _usedSwMobs;
@@ -107,7 +105,6 @@ class CANController : public Task
 		void enableInterrupts(uint32_t interruptFlags);
 		void disableInterrupts(uint32_t interruptFlags);
 		void handleInterrupt();
-		//void notifyObservers(tCANMsgObject *obj);
 		void notifyObservers(CanRxMsgTypeDef *msgHndle);
 
 		observer_list_t *createObserverListFragment();

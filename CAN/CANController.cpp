@@ -60,7 +60,15 @@ CANController::CANController(CAN::channel_t channel) :
 	_bitrate(CAN::bitrate_500kBit),
 	_pool(100)
 {
-	static const char* tasknames[3] = { "can1", "can2" };
+	static const char* tasknames[CAN::num_can_channels] = {
+#ifdef HAS_CAN_CHANNEL_1
+			"can1"
+#endif
+#ifdef HAS_CAN_CHANNEL_2
+			"can2",
+#endif
+	 };
+
 	setTaskName(tasknames[channel]);
 
 	_observers = createObserverListFragment();
@@ -81,13 +89,59 @@ void CANController::setBitrate(CAN::bitrate_t bitrate)
 void CANController::setup(CAN::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpin)
 {
 	switch(_channel) {
+#ifdef HAS_CAN_CHANNEL_1
 	case CAN::can_channel_1:
+		_handle.Instance = CAN1;
+		rxpin.mapAsCAN1RX();
+		txpin.mapAsCAN1TX();
 		break;
+#endif
+#ifdef HAS_CAN_CHANNEL_2
 	case CAN::can_channel_2:
+		_handle.Instance = CAN2;
+		rxpin.mapAsCAN2RX();
+		txpin.mapAsCAN2TX();
 		break;
+#endif
 	default:
 		while(1) {;}
 	}
+
+	_handle.State = HAL_CAN_STATE_RESET;
+
+
+	_handle.Init.RFLM = DISABLE;
+	_handle.Init.TXFP = DISABLE;
+	_handle.Init.TTCM = DISABLE;
+	_handle.Init.AWUM = DISABLE;
+	_handle.Init.NART = DISABLE;
+	_handle.Init.ABOM = ENABLE;
+	_handle.Init.BS1 = CAN_BS1_10TQ; /* Set Sampling Point to 73.3 percent */
+	_handle.Init.BS2 = CAN_BS2_4TQ;  /* Set Sampling Point to 73.3 percent */
+	_handle.Init.SJW = CAN_SJW_1TQ;  /* Values 1-4 allowed */
+
+
+	/*
+	 TODO FIXME: bitrate configuration!
+	 */
+
+	_handle.Lock = HAL_UNLOCKED;
+	HAL_CAN_Init(&_handle);
+
+	CAN_FilterConfTypeDef CAN_FilterInitStructure;
+
+	CAN_FilterInitStructure.FilterNumber=1;
+	CAN_FilterInitStructure.FilterMode=CAN_FILTERMODE_IDMASK;
+	CAN_FilterInitStructure.FilterScale=CAN_FILTERSCALE_16BIT;
+	CAN_FilterInitStructure.FilterIdHigh=0x0000;
+	CAN_FilterInitStructure.FilterIdLow=0x0000;
+	CAN_FilterInitStructure.FilterMaskIdHigh=0x0000;
+	CAN_FilterInitStructure.FilterMaskIdLow=0x0000;
+	CAN_FilterInitStructure.FilterFIFOAssignment=CAN_FIFO0;
+	CAN_FilterInitStructure.FilterActivation=ENABLE;
+	CAN_FilterInitStructure.BankNumber = 1;
+	HAL_CAN_ConfigFilter(&_handle, &CAN_FilterInitStructure);
+
 
 }
 
