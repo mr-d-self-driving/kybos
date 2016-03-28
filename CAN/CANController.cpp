@@ -157,6 +157,7 @@ void CANController::setup(CAN::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpin)
 	_handle.Init.AWUM = DISABLE;
 	_handle.Init.NART = DISABLE;
 	_handle.Init.ABOM = ENABLE;
+	_handle.Init.Mode = CAN_MODE_NORMAL;
 
 	setBitrate(bitrate);
 
