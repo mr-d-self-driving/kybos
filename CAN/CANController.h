@@ -120,6 +120,8 @@ class CANController : public Task
 
 		uint32_t sendCyclicCANMessages();
 
+		void setBitrate(CAN::bitrate_t bitrate);
+
 	protected:
 		/// the CAN Controller task routine
 		/**
@@ -146,7 +148,6 @@ class CANController : public Task
 		 * @param txpin the GPIOPin for CAN-TX. the pin's GPIO Hardware will be enabled, initialized and mapped.
 		 */
 		void setup(CAN::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpin);
-		void setBitrate(CAN::bitrate_t bitrate);
 
 		/// set time to wait for a free MOB in sendMessage() if message buffers are full
 		/**
