@@ -85,6 +85,23 @@ void CANController::setBitrate(CAN::bitrate_t bitrate)
 	uint32_t pclk1 = HAL_RCC_GetPCLK1Freq();
 
 	switch (pclk1){
+	case 48000000:
+		_handle.Init.BS1 = CAN_BS1_11TQ; /* Set Sampling Point to 75.0 percent */
+		_handle.Init.BS2 = CAN_BS2_4TQ;  /* Set Sampling Point to 75.0 percent */
+		_handle.Init.SJW = CAN_SJW_2TQ;  /* Values 1-4 allowed */
+		switch (bitrate) {
+		case 100000:
+		case 125000:
+		case 250000:
+		case 500000:
+		case 1000000:
+			_handle.Init.Prescaler = pclk1/(bitrate*(1+11+4)); // Sync == 1Tq, BS1 == 11Tq, BS2 == 4Tq
+			break;
+		default:
+			while (1) { ; }
+		}
+
+		break;
 	case 45000000:
 		_handle.Init.BS1 = CAN_BS1_10TQ; /* Set Sampling Point to 73.3 percent */
 		_handle.Init.BS2 = CAN_BS2_4TQ;  /* Set Sampling Point to 73.3 percent */
@@ -95,7 +112,7 @@ void CANController::setBitrate(CAN::bitrate_t bitrate)
 		case 250000:
 		case 500000:
 		case 1000000:
-			_handle.Init.Prescaler = pclk1/(bitrate*(1+10+4)); // Sync: 1Tq, BS1=10Tq, BS2=4Tq
+			_handle.Init.Prescaler = pclk1/(bitrate*(1+10+4)); // Sync == 1Tq, BS1 == 10Tq, BS2 == 4Tq
 			break;
 		default:
 			while (1) { ; }
@@ -112,7 +129,7 @@ void CANController::setBitrate(CAN::bitrate_t bitrate)
 		case 250000:
 		case 500000:
 		case 1000000:
-			_handle.Init.Prescaler = pclk1/(bitrate*(1+15+5)); // Sync: 1Tq, BS1=10Tq, BS2=4Tq
+			_handle.Init.Prescaler = pclk1/(bitrate*(1+15+5)); // Sync == 1Tq, BS1 == 10Tq, BS2 == 4Tq
 			break;
 		default:
 			while (1) { ; }
