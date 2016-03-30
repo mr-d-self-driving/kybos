@@ -13,7 +13,6 @@
 #include <cmsis_device.h>
 
 #include GENERATE_HAL_INCLUDE(STM32_FAMILY, _gpio)
-//#include <stm32l1xx_hal_gpio.h>
 
 
 class GPIOPin;
@@ -95,8 +94,38 @@ public:
 		GPIO_EVT_RISING_FALLING = GPIO_MODE_EVT_RISING_FALLING
 	} gpio_config_t;
 
-	typedef enum {GPIO_SPD_LOW=GPIO_SPEED_FREQ_LOW, GPIO_SPD_MEDIUM=GPIO_SPEED_FREQ_MEDIUM, GPIO_SPD_HIGH=GPIO_SPEED_FREQ_HIGH, GPIO_SPD_VERY_HIGH=GPIO_SPEED_FREQ_VERY_HIGH } gpio_speed_t;
-	typedef enum {GPIO_NO_PULL=0, GPIO_PULL_UP=1, GPIO_PULL_DOWN=2} gpio_pull_t;
+
+	typedef enum {
+#ifdef GPIO_SPEED_FREQ_VERY_LOW
+		GPIO_SPD_LOW=GPIO_SPEED_FREQ_VERY_LOW,
+#endif
+#ifdef GPIO_SPEED_FREQ_LOW
+		GPIO_SPD_LOW=GPIO_SPEED_FREQ_LOW,
+#endif
+#ifdef GPIO_SPEED_FREQ_MEDIUM
+		GPIO_SPD_MEDIUM=GPIO_SPEED_FREQ_MEDIUM,
+#endif
+#ifdef GPIO_SPEED_FREQ_HIGH
+		GPIO_SPD_HIGH=GPIO_SPEED_FREQ_HIGH,
+#endif
+#ifdef GPIO_SPEED_FREQ_VERY_HIGH
+		GPIO_SPD_VERY_HIGH=GPIO_SPEED_FREQ_VERY_HIGH
+#endif
+
+	} gpio_speed_t;
+
+
+	typedef enum {
+#ifdef GPIO_NOPULL
+		GPIO_NO_PULL=GPIO_NOPULL,
+#endif
+#ifdef GPIO_PULLUP
+		GPIO_PULL_UP=GPIO_PULLUP,
+#endif
+#ifdef GPIO_PULLDOWN
+		GPIO_PULL_DOWN=GPIO_PULLDOWN
+#endif
+	} gpio_pull_t;
 
 	typedef enum {AF_CONFIG_0, AF_CONFIG_1, AF_CONFIG_2, AF_CONFIG_3, AF_CONFIG_4, AF_CONFIG_5,
 		AF_CONFIG_6, AF_CONFIG_7, AF_CONFIG_8, AF_CONFIG_9, AF_CONFIG_10, AF_CONFIG_11, AF_CONFIG_12, AF_CONFIG_13, AF_CONFIG_14, AF_CONFIG_15, AF_CONFIG_NONE} gpio_afconfig_t;
@@ -128,7 +157,6 @@ public:
 	void mapAsSPI1MISO();
 	void mapAsSPI1MOSI();
 	void mapAsSPI1NSS();
-	void mapAsCAN1TX();
 	void mapAsCAN1RX();
 	void mapAsCAN1TX();
 	void mapAsCAN2RX();

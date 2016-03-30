@@ -7,7 +7,6 @@
 
 
 
-#include "SPIController.h"
 
 #include "kybos.h"
 
@@ -20,6 +19,8 @@
 #include <cmsis_device.h>
 
 #include "GPIO.h"
+
+#include "SPIController.h"
 
 
 
