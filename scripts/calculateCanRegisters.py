@@ -48,6 +48,7 @@ def main():
 	## This mode calculates the appropriate divider for given BS1 and BS2 values
 	if options.calc_divisor: 
 		can_baudrates = [100000, 125000, 250000, 500000, 1000000]
+		print("clock = ", options.clock)
 		for br in can_baudrates:
 			d = getDivisor(br, options.clock, options.bs1, options.bs2)
 			sp = getSamplingPoint(options.bs1, options.bs2)
