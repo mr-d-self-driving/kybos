@@ -128,24 +128,6 @@ void CANController::setBitrate(CAN::bitrate_t bitrate)
 
 void CANController::setup(CAN::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpin)
 {
-	switch(_channel) {
-#ifdef HAS_CAN_CHANNEL_1
-	case CAN::can_channel_1:
-		_handle.Instance = CAN1;
-		rxpin.mapAsCAN1RX();
-		txpin.mapAsCAN1TX();
-		break;
-#endif
-#ifdef HAS_CAN_CHANNEL_2
-	case CAN::can_channel_2:
-		_handle.Instance = CAN2;
-		rxpin.mapAsCAN2RX();
-		txpin.mapAsCAN2TX();
-		break;
-#endif
-	default:
-		while(1) {;}
-	}
 
 	_handle.State = HAL_CAN_STATE_RESET;
 
@@ -165,6 +147,31 @@ void CANController::setup(CAN::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpin)
 	setBitrate(bitrate);
 
 	_handle.Lock = HAL_UNLOCKED;
+
+	switch(_channel) {
+#ifdef HAS_CAN_CHANNEL_1
+	case CAN::can_channel_1:
+		_handle.Instance = CAN1;
+		rxpin.mapAsCAN1RX();
+		txpin.mapAsCAN1TX();
+		__HAL_RCC_CAN1_CLK_ENABLE();
+		break;
+#endif
+#ifdef HAS_CAN_CHANNEL_2
+	case CAN::can_channel_2:
+		_handle.Instance = CAN2;
+		rxpin.mapAsCAN2RX();
+		txpin.mapAsCAN2TX();
+		__HAL_RCC_CAN1_CLK_ENABLE(); // For CAN2, we need CAN1 clock also!
+		__HAL_RCC_CAN2_CLK_ENABLE();
+		break;
+#endif
+	default:
+		while(1) {;}
+	}
+
+
+
 	HAL_CAN_Init(&_handle);
 
 	CAN_FilterConfTypeDef CAN_FilterInitStructure;
@@ -181,6 +188,7 @@ void CANController::setup(CAN::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpin)
 	CAN_FilterInitStructure.BankNumber = 1;
 	HAL_CAN_ConfigFilter(&_handle, &CAN_FilterInitStructure);
 
+	this->enable();
 
 }
 
@@ -273,6 +281,25 @@ CAN::error_counters_t CANController::getErrorCounters()
 
 bool CANController::sendMessage(CANMessage *msg)
 {
+	MutexGuard guard(&_sendMessageMutex);
+
+	if (_silent) return true;
+
+	_handle.pTxMsg->DLC = msg->dlc;
+	_handle.pTxMsg->IDE = msg->isExtendedId()?CAN_ID_EXT:CAN_ID_STD;
+	_handle.pTxMsg->RTR = msg->isRemoteFrame()?CAN_RTR_REMOTE:CAN_RTR_DATA;
+	memcpy(_handle.pTxMsg->Data, msg->data, msg->dlc);
+	if (_handle.pTxMsg->IDE) {
+		_handle.pTxMsg->ExtId = msg->id;
+	}
+	else {
+		_handle.pTxMsg->StdId = msg->id;
+	}
+
+	HAL_StatusTypeDef status = HAL_CAN_Transmit(&_handle, _timeToWaitForFreeMob);
+
+	return (status == HAL_OK);
+
 #if 0
 	MutexGuard guard(&_sendMessageMutex);
 
@@ -297,9 +324,9 @@ bool CANController::sendMessage(CANMessage *msg)
 	} else {
 		return false;
 	}
-#endif
 
 	return false;
+#endif
 }
 
 CANController *CANController::_controllers[CAN::num_can_channels] = {0,};
@@ -314,14 +341,11 @@ CANController *CANController::get(CAN::channel_t channel)
 
 #ifdef HAS_CAN_CHANNEL_1
 			case CAN::can_channel_1:
-				__HAL_RCC_CAN1_CLK_ENABLE();
 				break;
 #endif
 
 #ifdef HAS_CAN_CHANNEL_2
 			case CAN::can_channel_2:
-				__HAL_RCC_CAN1_CLK_ENABLE(); // For CAN2, we need CAN1 clock also!
-				__HAL_RCC_CAN2_CLK_ENABLE();
 				break;
 #endif
 
