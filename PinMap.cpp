@@ -69,7 +69,7 @@ void GPIOPin::mapAsCAN2TX()
 
 	switch(_portPin) {
 	case 0x16:  // port B, pin 5
-	case 0x1D:  // port B, pin 12
+	case 0x1D:  // port B, pin 13
 		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF9_CAN2;
 		break;
 	default:
