@@ -35,7 +35,7 @@ namespace CANBus {
 		channel_1,
 #endif
 #ifdef HAS_CAN_CHANNEL_2
-		can_channel_2,
+		channel_2,
 #endif
 		num_channels
 	} channel_t;

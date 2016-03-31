@@ -167,13 +167,13 @@ void CANController::setup(CANBus::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpi
 
 	switch(_channel) {
 #if defined HAS_CAN_CHANNEL_2
-	case CANBus::can_channel_1:
+	case CANBus::channel_1:
 		_handle.Instance = CAN1;
 		rxpin.mapAsCAN1RX();
 		txpin.mapAsCAN1TX();
 		__HAL_RCC_CAN1_CLK_ENABLE();
 		break;
-	case CANBus::can_channel_2:
+	case CANBus::channel_2:
 		_handle.Instance = CAN2;
 		rxpin.mapAsCAN2RX();
 		txpin.mapAsCAN2TX();
