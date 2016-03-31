@@ -180,6 +180,7 @@ void GPIOPin::mapAsI2C3SCL()
 
 #ifdef STM32F072
 
+#ifdef HAL_SPI_MODULE_ENABLED
 void GPIOPin::mapAsSPI1CLK()
 {
 	GPIOPin::gpio_afconfig_t afconfig;
@@ -231,7 +232,9 @@ void GPIOPin::mapAsSPI1NSS()
 	}
 	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
 }
+#endif // HAL_SPI_MODULE_ENABLED
 
+#ifdef HAL_CAN_MODULE_ENABLED
 void GPIOPin::mapAsCAN1TX()
 {
 	GPIOPin::gpio_afconfig_t afconfig;
@@ -265,6 +268,7 @@ void GPIOPin::mapAsCAN1RX()
 	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
 
 }
+#endif // HAL_CAN_MODULE_ENABLED
 
 #endif // STM32F072
 
