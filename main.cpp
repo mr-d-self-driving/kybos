@@ -37,6 +37,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
+#ifndef STM32F0
 extern "C" {
 	void __attribute__((naked))
 	SysCtlDelay(unsigned long ulCount)
@@ -46,6 +47,8 @@ extern "C" {
 			  "    bx      lr");
 	}
 }
+#endif
+
 
 #pragma GCC diagnostic pop
 

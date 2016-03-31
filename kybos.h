@@ -111,6 +111,10 @@
 	#define HAS_CAN_CHANNEL_2
 #endif
 
+#if defined (STM32F072xB)
+	#define HAS_CAN_CHANNEL_1
+#endif
+
 // This macro is used to generate include paths
 // as HAL file names are generally based on the STM32 family's name
 // It's ugly, but it works
