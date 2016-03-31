@@ -29,7 +29,7 @@ CANObserver::CANObserver(uint8_t queueSize) :
 {
 }
 
-void CANObserver::listenCAN(CAN::channel_t channel)
+void CANObserver::listenCAN(CANBus::channel_t channel)
 {
 	CANController::get(channel)->registerObserver(this);
 }
@@ -39,7 +39,7 @@ void CANObserver::listenCAN(CANController *can)
 	can->registerObserver(this);
 }
 
-void CANObserver::listenCANId(CAN::channel_t channel, int32_t id, uint32_t mask)
+void CANObserver::listenCANId(CANBus::channel_t channel, int32_t id, uint32_t mask)
 {
 	CANController::get(channel)->registerObserver(this, id, mask);
 }
@@ -71,7 +71,7 @@ bool CANObserver::notifyCANMessage(CANMessage *obj)
 	return _queue.sendToBack(obj, 0);
 }
 
-void CANObserver::removeListenCAN(CAN::channel_t channel)
+void CANObserver::removeListenCAN(CANBus::channel_t channel)
 {
 	CANController::get(channel)->unregisterObserver(this);
 }
@@ -81,7 +81,7 @@ void CANObserver::removeListenCAN(CANController *can)
 	can->unregisterObserver(this);
 }
 
-void CANObserver::removeListenCANId(CAN::channel_t channel, int32_t id, uint32_t mask)
+void CANObserver::removeListenCANId(CANBus::channel_t channel, int32_t id, uint32_t mask)
 {
 	CANController::get(channel)->unregisterObserver(this, id, mask);
 }

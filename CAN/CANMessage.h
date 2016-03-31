@@ -65,7 +65,7 @@ class CANMessage {
 		/** @param msg the source message */
 		void assign(const CANMessage *msg);
 
-		CAN::channel_t getReceivingChannel();
+		CANBus::channel_t getReceivingChannel();
 		CANController *getReceivingController() const;
 		void setReceivingController(CANController *_receivingController);
 

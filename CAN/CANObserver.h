@@ -72,7 +72,7 @@ class CANObserver
 		 * Receiving all messages a busy CAN bus can result in high cpu load.
 		 * Consider using filters via listenCANId() if you expect a high traffic CAN bus.
 		 */
-		void listenCAN(CAN::channel_t channel);
+		void listenCAN(CANBus::channel_t channel);
 		void listenCAN(CANController *can);
 
 		/// listen to certain CAN messages on a channel
@@ -82,7 +82,7 @@ class CANObserver
 		 * @param id the can id to listen to.
 		 * @param mask the mask that applies to the id for the filter function.
 		 */
-		void listenCANId(CAN::channel_t channel, int32_t id, uint32_t mask=0xFFFFFFFF);
+		void listenCANId(CANBus::channel_t channel, int32_t id, uint32_t mask=0xFFFFFFFF);
 		void listenCANId(CANController *can, int32_t id, uint32_t mask=0xFFFFFFFF);
 
 		/// check whether a CAN message waits in the queue
@@ -100,9 +100,9 @@ class CANObserver
 		 */
 		bool getCANMessage(CANMessage *msg, uint32_t timeout=0xFFFFFFFF);
 
-		void removeListenCAN(CAN::channel_t channel);
+		void removeListenCAN(CANBus::channel_t channel);
 		void removeListenCAN(CANController *can);
-		void removeListenCANId(CAN::channel_t channel, int32_t id, uint32_t mask=0xFFFFFFFF);
+		void removeListenCANId(CANBus::channel_t channel, int32_t id, uint32_t mask=0xFFFFFFFF);
 		void removeListenCANId(CANController *can, int32_t id, uint32_t mask=0xFFFFFFFF);
 
 };

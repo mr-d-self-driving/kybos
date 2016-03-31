@@ -7,6 +7,7 @@
 
 #ifndef CANMESSAGEPOOL_H_
 #define CANMESSAGEPOOL_H_
+
 #include "CANMessage.h"
 #include "../OS/Mutex.h"
 #include "../generics/LinkedList.h"

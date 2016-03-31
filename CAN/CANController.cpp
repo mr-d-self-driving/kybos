@@ -49,17 +49,17 @@ void CAN2IntHandler(void) {
 */
 
 
-CANController::CANController(CAN::channel_t channel) :
+CANController::CANController(CANBus::channel_t channel) :
 	Task(0, 160),
 	_channel(channel),
 	_observerMutex(),
 	_lastMessageReceivedTimestamp(0),
 	_silent(false),
 	_timeToWaitForFreeMob(100),
-	_bitrate(CAN::bitrate_500kBit),
+	_bitrate(CANBus::bitrate_500kBit),
 	_pool(100)
 {
-	static const char* tasknames[CAN::num_can_channels] = {
+	static const char* tasknames[CANBus::num_channels] = {
 #ifdef HAS_CAN_CHANNEL_1
 			"can1"
 #endif
@@ -80,7 +80,7 @@ CANController::observer_list_t *CANController::createObserverListFragment()
 	return result;
 }
 
-void CANController::setBitrate(CAN::bitrate_t bitrate)
+void CANController::setBitrate(CANBus::bitrate_t bitrate)
 {
 	uint32_t pclk1 = HAL_RCC_GetPCLK1Freq();
 
@@ -143,7 +143,7 @@ void CANController::setBitrate(CAN::bitrate_t bitrate)
 
 }
 
-void CANController::setup(CAN::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpin)
+void CANController::setup(CANBus::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpin)
 {
 
 	_handle.State = HAL_CAN_STATE_RESET;
@@ -166,21 +166,26 @@ void CANController::setup(CAN::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpin)
 	_handle.Lock = HAL_UNLOCKED;
 
 	switch(_channel) {
-#ifdef HAS_CAN_CHANNEL_1
-	case CAN::can_channel_1:
+#if defined HAS_CAN_CHANNEL_2
+	case CANBus::can_channel_1:
 		_handle.Instance = CAN1;
 		rxpin.mapAsCAN1RX();
 		txpin.mapAsCAN1TX();
 		__HAL_RCC_CAN1_CLK_ENABLE();
 		break;
-#endif
-#ifdef HAS_CAN_CHANNEL_2
-	case CAN::can_channel_2:
+	case CANBus::can_channel_2:
 		_handle.Instance = CAN2;
 		rxpin.mapAsCAN2RX();
 		txpin.mapAsCAN2TX();
 		__HAL_RCC_CAN1_CLK_ENABLE(); // For CAN2, we need CAN1 clock also!
 		__HAL_RCC_CAN2_CLK_ENABLE();
+		break;
+#elif defined HAS_CAN_CHANNEL_1
+	case CANBus::channel_1:
+		_handle.Instance = CAN;
+		rxpin.mapAsCAN1RX();
+		txpin.mapAsCAN1TX();
+		__HAL_RCC_CAN1_CLK_ENABLE();
 		break;
 #endif
 	default:
@@ -287,9 +292,9 @@ void CANController::disable()
 }
 
 
-CAN::error_counters_t CANController::getErrorCounters()
+CANBus::error_counters_t CANController::getErrorCounters()
 {
-	CAN::error_counters_t result = { 0, 0, false};
+	CANBus::error_counters_t result = { 0, 0, false};
 
 	// TODO FIXME: to be implemented
 	return result;
@@ -346,8 +351,8 @@ bool CANController::sendMessage(CANMessage *msg)
 #endif
 }
 
-CANController *CANController::_controllers[CAN::num_can_channels] = {0,};
-CANController *CANController::get(CAN::channel_t channel)
+CANController *CANController::_controllers[CANBus::num_channels] = {0,};
+CANController *CANController::get(CANBus::channel_t channel)
 {
 	static Mutex _mutex;
 	MutexGuard guard(&_mutex);
@@ -357,12 +362,12 @@ CANController *CANController::get(CAN::channel_t channel)
 		switch (channel) {
 
 #ifdef HAS_CAN_CHANNEL_1
-			case CAN::can_channel_1:
+			case CANBus::channel_1:
 				break;
 #endif
 
 #ifdef HAS_CAN_CHANNEL_2
-			case CAN::can_channel_2:
+			case CANBus::channel_2:
 				break;
 #endif
 

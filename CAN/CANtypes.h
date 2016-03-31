@@ -26,18 +26,18 @@
 #define CANTYPES_H_
 
 #include <stdint.h>
+#include "../kybos.h"
 
-
-namespace CAN {
+namespace CANBus {
 
 	typedef enum {
 #ifdef HAS_CAN_CHANNEL_1
-		can_channel_1,
+		channel_1,
 #endif
 #ifdef HAS_CAN_CHANNEL_2
 		can_channel_2,
 #endif
-		num_can_channels
+		num_channels
 	} channel_t;
 
 	typedef enum {

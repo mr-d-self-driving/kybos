@@ -74,9 +74,9 @@ class CANController : public Task
 
 		FragmentedList<CANCyclicMessage,10> _cyclicMessages;
 
-		static CANController *_controllers[CAN::num_can_channels];
+		static CANController *_controllers[CANBus::num_channels];
 
-		CAN::channel_t _channel;
+		CANBus::channel_t _channel;
 		CAN_HandleTypeDef _handle;
 		CanTxMsgTypeDef _txMsg;
 		CanRxMsgTypeDef _rxMsg;
@@ -92,12 +92,12 @@ class CANController : public Task
 		bool _silent;
 		uint32_t _timeToWaitForFreeMob;
 
-		CAN::bitrate_t _bitrate;
+		CANBus::bitrate_t _bitrate;
 
 		CANMessagePool _pool;
 		Mutex _sendMessageMutex;
 
-		CANController(CAN::channel_t channel);
+		CANController(CANBus::channel_t channel);
 		void enableInterrupts(uint32_t interruptFlags);
 		void disableInterrupts(uint32_t interruptFlags);
 		void handleInterrupt();
@@ -114,7 +114,7 @@ class CANController : public Task
 
 		uint32_t sendCyclicCANMessages();
 
-		void setBitrate(CAN::bitrate_t bitrate);
+		void setBitrate(CANBus::bitrate_t bitrate);
 
 	protected:
 		/// the CAN Controller task routine
@@ -129,19 +129,19 @@ class CANController : public Task
 	public:
 		/// get CANController instance
 		/**
-		 * @param channel Number of the returned CANController (e.g. CAN::channel_0)
+		 * @param channel Number of the returned CANController (e.g. CANx::channel_0)
 		 * @return the requested CANController object. newly constructed, if not requested before.
 		 */
-		static CANController* get(CAN::channel_t channel);
+		static CANController* get(CANBus::channel_t channel);
 
 		/// setup can hardware
 		/**
 		 * after setup, the can controller has to be enabled to be fully functional. @see enable()
-		 * @param bitrate the CAN bitrate for this channel, e.g. CAN::bitrate_500kBit.
+		 * @param bitrate the CAN bitrate for this channel, e.g. CANx::bitrate_500kBit.
 		 * @param rxpin the GPIOPin for CAN-RX. the pin's GPIO Hardware will be enabled, initialized and mapped.
 		 * @param txpin the GPIOPin for CAN-TX. the pin's GPIO Hardware will be enabled, initialized and mapped.
 		 */
-		void setup(CAN::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpin);
+		void setup(CANBus::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpin);
 
 		/// set time to wait for a free MOB in sendMessage() if message buffers are full
 		/**
@@ -157,7 +157,7 @@ class CANController : public Task
 
 		bool isAutomaticRetransmission();
 		void setAutomaticRetransmission(bool retransmit);
-		CAN::error_counters_t getErrorCounters();
+		CANBus::error_counters_t getErrorCounters();
 
 		/// send a CANMessage object
 		bool sendMessage(CANMessage *msg);
@@ -283,7 +283,7 @@ class CANController : public Task
 		void setSilent(bool beSilent);
 
 		/// get this controller's channel
-		CAN::channel_t getChannel() { return _channel; }
+		CANBus::channel_t getChannel() { return _channel; }
 
 };
 

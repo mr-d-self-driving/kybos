@@ -67,10 +67,10 @@ CANController *CANMessage::getReceivingController() const
     return _receivingController;
 }
 
-CAN::channel_t CANMessage::getReceivingChannel()
+CANBus::channel_t CANMessage::getReceivingChannel()
 {
 	if (!_receivingController) {
-		return CAN::num_can_channels; // this basically serves as "None" now.
+		return CANBus::num_channels; // this basically serves as "None" now.
 	}
 	return _receivingController->getChannel();
 }
