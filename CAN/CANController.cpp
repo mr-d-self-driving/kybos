@@ -232,6 +232,7 @@ void CANController::execute()
 		if (timeToWait>100) timeToWait = 100;
 
 		_usedSwMobs.peek(&num, timeToWait);
+		//delay_ms(timeToWait);
 
 	}
 }

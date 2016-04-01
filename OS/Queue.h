@@ -75,7 +75,7 @@ template <class T> class Queue
 		 */
 		bool sendToFront(const T item, uint32_t timeout_ms=portMAX_DELAY)
 		{
-			return xQueueSendToFront(_hnd, &item, (timeout_ms>0x3FFFFFFF) ? 0xFFFFFFFF : 4*timeout_ms) == pdTRUE;
+			return xQueueSendToFront(_hnd, &item, timeout_ms) == pdTRUE;
 		}
 
 		/// put an element to the front of the queue, from ISR context
@@ -103,7 +103,7 @@ template <class T> class Queue
 		 */
 		bool sendToBack(const T item, uint32_t timeout_ms=portMAX_DELAY)
 		{
-			return xQueueSendToBack(_hnd, &item, (timeout_ms>0x3FFFFFFF) ? 0xFFFFFFFF : 4*timeout_ms) == pdTRUE;
+			return xQueueSendToBack(_hnd, &item, timeout_ms) == pdTRUE;
 		}
 
 		/// push an element to the back of the queue, from ISR context
@@ -131,7 +131,7 @@ template <class T> class Queue
 		 */
 		bool receive(T *buf, uint32_t timeout_ms=portMAX_DELAY)
 		{
-			return xQueueReceive(_hnd, buf, (timeout_ms>0x3FFFFFFF) ? 0xFFFFFFFF : 4*timeout_ms) == pdTRUE;
+			return xQueueReceive(_hnd, buf, timeout_ms) == pdTRUE;
 		}
 
 		/// receive the first element in the queue, from ISR context
@@ -159,7 +159,7 @@ template <class T> class Queue
 		 */
 		bool peek(T *buf, uint32_t timeout_ms=portMAX_DELAY)
 		{
-			return xQueuePeek(_hnd, buf, (timeout_ms>0x3FFFFFFF) ? 0xFFFFFFFF : 4*timeout_ms) == pdTRUE;
+			return xQueuePeek(_hnd, buf, timeout_ms) == pdTRUE;
 		}
 
 		/// give the queue a name in the freeRTOS queue registry

@@ -41,7 +41,7 @@ bool RecursiveMutex::give()
 
 bool RecursiveMutex::take(uint32_t timeout_ms)
 {
-	return xSemaphoreTakeRecursive(_hnd, (timeout_ms>0x3FFFFFFF) ? 0xFFFFFFFF : 4*timeout_ms) == pdTRUE;
+	return xSemaphoreTakeRecursive(_hnd, timeout_ms) == pdTRUE;
 }
 
 
