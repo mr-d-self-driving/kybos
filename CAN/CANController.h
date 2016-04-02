@@ -56,6 +56,10 @@ class CANObserver;
 
 class CANController : public Task
 {
+	friend void CEC_CAN_IRQHandler();
+	friend void CAN1IntHandler(void);
+	friend void CAN2IntHandler(void);
+
 	private:
 
 		static const uint8_t observer_list_length = 10;

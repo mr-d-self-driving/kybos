@@ -34,19 +34,14 @@
 
 #ifdef HAL_CAN_MODULE_ENABLED
 
-/*
-void CAN0IntHandler(void) {
+void CAN1IntHandler(void) {
 	CANController::_controllers[0]->handleInterrupt();
 }
 
-void CAN1IntHandler(void) {
+void CAN2IntHandler(void) {
 	CANController::_controllers[1]->handleInterrupt();
 }
 
-void CAN2IntHandler(void) {
-	CANController::_controllers[2]->handleInterrupt();
-}
-*/
 
 
 CANController::CANController(CANBus::channel_t channel) :
@@ -240,6 +235,8 @@ void CANController::execute()
 
 void CANController::handleInterrupt()
 {
+	HAL_CAN_IRQHandler(&_handle);
+
 #if 0
 	uint32_t cause = MAP_CANIntStatus(_base, CAN_INT_STS_CAUSE);
 	if (cause == CAN_INT_INTID_STATUS) // status interrupt. error occurred?
@@ -699,6 +696,14 @@ void CANController::setTimeToWaitForFreeMob(uint32_t ms_to_wait)
 	_timeToWaitForFreeMob = ms_to_wait;
 }
 
+#ifdef STM32F0
+
+void CEC_CAN_IRQHandler(void)
+{
+	CAN1IntHandler();
+}
+
+#endif
 
 #endif // HAL_CAN_MODULE_ENABLED
 
