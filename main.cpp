@@ -58,6 +58,8 @@ extern "C" {
 
 extern "C" {
 
+	static int freertos_is_ready=0;
+
 	// must be implemented outside of kybos, i.e. in the application code
 	extern void SystemClock_Config(void);
 
@@ -94,7 +96,9 @@ extern "C" {
 	void SysTick_Handler( void )
 	{
 		HAL_IncTick();
-		xPortSysTickHandler();
+		if (freertos_is_ready) {
+			xPortSysTickHandler();
+		}
 	}
 
 	void vApplicationIdleHook( void )
@@ -119,6 +123,7 @@ int main(void)
 	MainTask *mt = new MainTask();
 	mt->run();
 	//osKernelStart(NULL, NULL);
+	freertos_is_ready = 0xff;
 	vTaskStartScheduler();
 
 
