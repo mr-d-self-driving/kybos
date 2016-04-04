@@ -52,7 +52,7 @@ CANController::CANController(CANBus::channel_t channel) :
 	_silent(false),
 	_timeToWaitForFreeMob(100),
 	_bitrate(CANBus::bitrate_500kBit),
-	_pool(100)
+	_pool(20)
 {
 	static const char* tasknames[CANBus::num_channels] = {
 #ifdef HAS_CAN_CHANNEL_1
@@ -205,6 +205,17 @@ void CANController::setup(CANBus::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpi
 	CAN_FilterInitStructure.BankNumber = 1;
 	HAL_CAN_ConfigFilter(&_handle, &CAN_FilterInitStructure);
 
+#if defined(STM32F0)
+	HAL_NVIC_SetPriority(CEC_CAN_IRQn, 3, 0); /* Set CAN1 Rx interrupt priority to 3-0 */
+	HAL_NVIC_EnableIRQ(CEC_CAN_IRQn); /* Enable CAN1 Rx Interrupt */
+#elif defined(STM32F4)
+#error "NOT IMPLEMENTED YET"
+#else
+#error "NOT IMPLEMENTED YET"
+#endif
+
+	__HAL_CAN_ENABLE_IT(&_handle, CAN_IT_FMP0); /* Enable 'message pending in FIFO0' interrupt */
+
 	this->enable();
 
 }
@@ -214,14 +225,12 @@ void CANController::execute()
 	while(1) {
 		uint8_t num;
 
-		/*
 		while (_usedSwMobs.receive(&num, 0)) {
-			tCANMsgObject *msgobj = &_swmobs[num];
 			_lastMessageReceivedTimestamp = getTime();
-			notifyObservers(msgobj);
+			notifyObservers(&_rxMsgBuf[num]);
 			_freeSwMobs.sendToBack(num);
 		}
-		*/
+
 
 		uint32_t timeToWait = sendCyclicCANMessages();
 		if (timeToWait>100) timeToWait = 100;
@@ -232,38 +241,9 @@ void CANController::execute()
 	}
 }
 
-
 void CANController::handleInterrupt()
 {
 	HAL_CAN_IRQHandler(&_handle);
-
-#if 0
-	uint32_t cause = MAP_CANIntStatus(_base, CAN_INT_STS_CAUSE);
-	if (cause == CAN_INT_INTID_STATUS) // status interrupt. error occurred?
-	{
-		uint32_t status = getControlRegister(); // also clears the interrupt
-	} else if ( (cause >= 1) && (cause <= 32) ) // mailbox event
-	{
-		//CANIntClear(_base, cause);
-		//_isrToThreadQueue.sendToBackFromISR(cause-1);
-		uint8_t mobId;
-		if (_freeSwMobs.receiveFromISR(&mobId)) {
-			tCANMsgObject *msgobj = &_swmobs[mobId];
-			MAP_CANMessageGet(_base, cause, msgobj, 1);
-			if (cause < 16+1) {
-				// RX MOB
-				_usedSwMobs.sendToBackFromISR(mobId);
-			}
-			else{
-				// TX MOB
-				_freeSwMobs.sendToBackFromISR(mobId);
-			}
-		}
-		else {
-			CANIntClear(_base, cause);
-		}
-	}
-#endif
 }
 
 /*
@@ -319,34 +299,6 @@ bool CANController::sendMessage(CANMessage *msg)
 	HAL_StatusTypeDef status = HAL_CAN_Transmit(&_handle, _timeToWaitForFreeMob);
 
 	return (status == HAL_OK);
-
-#if 0
-	MutexGuard guard(&_sendMessageMutex);
-
-	if (_silent) return true;
-	uint8_t mob = findFreeSendingMOB();
-	if (mob>0) {
-
-		tCANMsgObject msgobj;
-
-		if (msg->id>=0x800) {
-			msg->setExtendedId(true);
-		}
-
-		msgobj.ulMsgID = msg->id;
-		msgobj.ulMsgIDMask = 0;
-		msgobj.ulMsgLen = msg->dlc;
-		msgobj.pucMsgData = msg->data;
-		msgobj.ulFlags = msg->_flags;
-		MAP_CANMessageSet(_base, mob+1, &msgobj, MSG_OBJ_TYPE_TX);
-
-		return true;
-	} else {
-		return false;
-	}
-
-	return false;
-#endif
 }
 
 CANController *CANController::_controllers[CANBus::num_channels] = {0,};
@@ -686,6 +638,15 @@ bool CANController::sendMessage(uint32_t id, uint8_t dlc, const void* const ptr)
 	return sendMessage(&msg);
 }
 
+void CANController::handleRx(void)
+{
+	uint8_t rxBufId;
+	_freeSwMobs.receiveFromISR(&rxBufId);
+	memcpy (&_rxMsgBuf[rxBufId], _handle.pRxMsg, sizeof(CanRxMsgTypeDef));
+	_usedSwMobs.sendToBackFromISR(rxBufId);
+	__HAL_CAN_ENABLE_IT(&_handle, CAN_IT_FMP0); /* Enable 'message pending in FIFO0' interrupt */
+}
+
 void CANController::setSilent(bool beSilent)
 {
 	_silent = beSilent;
@@ -698,11 +659,22 @@ void CANController::setTimeToWaitForFreeMob(uint32_t ms_to_wait)
 
 #ifdef STM32F0
 
+extern "C" {
+
 void CEC_CAN_IRQHandler(void)
 {
 	CAN1IntHandler();
 }
 
+
+void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef *hcan)
+{
+	UNUSED(hcan);
+	CANController::_controllers[0]->handleRx();
+
+}
+
+}
 #endif
 
 #endif // HAL_CAN_MODULE_ENABLED
