@@ -55,13 +55,34 @@ class CANObserver;
  */
 
 extern "C" {
-void CEC_CAN_IRQHandler(void);
+
+#if defined (STM32F0)
+	void CEC_CAN_IRQHandler(void);
+#elif defined (STM32F4)
+	void CAN1_TX_IRQHandler(void);
+	void CAN2_TX_IRQHandler(void);
+	void CAN1_RX0_IRQHandler(void);
+	void CAN1_RX1_IRQHandler(void);
+	void CAN2_RX0_IRQHandler(void);
+	void CAN2_RX1_IRQHandler(void);
+#endif
+
 void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan);
 }
 
 class CANController : public Task
 {
-	friend void CEC_CAN_IRQHandler();
+#if defined (STM32F0)
+	friend void CEC_CAN_IRQHandler(void);
+#elif defined (STM32F4)
+	friend void CAN1_TX_IRQHandler(void);
+	friend void CAN2_TX_IRQHandler(void);
+	friend void CAN1_RX0_IRQHandler(void);
+	friend void CAN1_RX1_IRQHandler(void);
+	friend void CAN2_RX0_IRQHandler(void);
+	friend void CAN2_RX1_IRQHandler(void);
+#endif
+
 	friend void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef *hcan);
 
 	private:

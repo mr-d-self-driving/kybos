@@ -184,27 +184,56 @@ void CANController::setup(CANBus::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpi
 	CAN_FilterConfTypeDef CAN_FilterInitStructure;
 
 	CAN_FilterInitStructure.FilterNumber=1;
-	CAN_FilterInitStructure.FilterMode=CAN_FILTERMODE_IDMASK;
+	CAN_FilterInitStructure.FilterMode=CAN_FILTERMODE_IDMASK;  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+
 	CAN_FilterInitStructure.FilterScale=CAN_FILTERSCALE_16BIT;
 	CAN_FilterInitStructure.FilterIdHigh=0x0000;
 	CAN_FilterInitStructure.FilterIdLow=0x0000;
-	CAN_FilterInitStructure.FilterMaskIdHigh=0x0000;
+	CAN_FilterInitStructure.FilterMaskIdHigh=0x0000;  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+
 	CAN_FilterInitStructure.FilterMaskIdLow=0x0000;
 	CAN_FilterInitStructure.FilterFIFOAssignment=CAN_FIFO0;
 	CAN_FilterInitStructure.FilterActivation=ENABLE;
 	CAN_FilterInitStructure.BankNumber = 1;
 	HAL_CAN_ConfigFilter(&_handle, &CAN_FilterInitStructure);
 
+
+	CAN_FilterInitStructure.FilterFIFOAssignment=CAN_FIFO1;  //setup for FIFO1, also
+	HAL_CAN_ConfigFilter(&_handle, &CAN_FilterInitStructure);
+
+
+	switch(_channel) {
+#if defined HAS_CAN_CHANNEL_2
+	case CANBus::channel_1:
+		HAL_NVIC_SetPriority(CAN1_TX_IRQn, 3, 0);
+		HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 3, 0);
+		HAL_NVIC_SetPriority(CAN1_RX1_IRQn, 3, 0);
+		HAL_NVIC_EnableIRQ(CAN1_TX_IRQn);
+		HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
+		HAL_NVIC_EnableIRQ(CAN1_RX1_IRQn);
+		break;
+	case CANBus::channel_2:
+		HAL_NVIC_SetPriority(CAN2_TX_IRQn, 3, 0);
+		HAL_NVIC_SetPriority(CAN2_RX0_IRQn, 3, 0);
+		HAL_NVIC_SetPriority(CAN2_RX1_IRQn, 3, 0);
+		HAL_NVIC_EnableIRQ(CAN2_TX_IRQn);
+		HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
+		HAL_NVIC_EnableIRQ(CAN2_RX1_IRQn);
+		break;
+#elif defined HAS_CAN_CHANNEL_1
+	case CANBus::channel_1:
 #if defined(STM32F0)
-	HAL_NVIC_SetPriority(CEC_CAN_IRQn, 3, 0); /* Set CAN1 Rx interrupt priority to 3-0 */
-	HAL_NVIC_EnableIRQ(CEC_CAN_IRQn); /* Enable CAN1 Rx Interrupt */
-#elif defined(STM32F4)
-#error "NOT IMPLEMENTED YET"
-#else
-#error "NOT IMPLEMENTED YET"
+		HAL_NVIC_SetPriority(CEC_CAN_IRQn, 3, 0); /* Set CAN1 Rx interrupt priority to 3-0 */
+		HAL_NVIC_EnableIRQ(CEC_CAN_IRQn); /* Enable CAN1 Rx Interrupt */
 #endif
+		break;
+#endif
+	default:
+		while(1) {;}
+	}
 
 	__HAL_CAN_ENABLE_IT(&_handle, CAN_IT_FMP0); /* Enable 'message pending in FIFO0' interrupt */
+	__HAL_CAN_ENABLE_IT(&_handle, CAN_IT_FMP1); /* Enable 'message pending in FIFO0' interrupt */
 
 	this->enable();
 
@@ -636,6 +665,41 @@ void CEC_CAN_IRQHandler(void)
 {
 	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
 }
+#endif
+
+#ifdef STM32F4
+
+void CAN1_TX_IRQHandler(void)
+{
+	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
+}
+
+void CAN2_TX_IRQHandler(void)
+{
+	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
+}
+
+void CAN1_RX0_IRQHandler(void)
+{
+	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
+}
+
+void CAN1_RX1_IRQHandler(void)
+{
+	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
+}
+
+void CAN2_RX0_IRQHandler(void)
+{
+	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
+}
+
+void CAN2_RX1_IRQHandler(void)
+{
+	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
+}
+
+
 #endif
 
 void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef *hcan)
