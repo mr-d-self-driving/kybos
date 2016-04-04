@@ -62,8 +62,6 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan);
 class CANController : public Task
 {
 	friend void CEC_CAN_IRQHandler();
-	friend void CAN1IntHandler(void);
-	friend void CAN2IntHandler(void);
 	friend void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef *hcan);
 
 	private:
@@ -92,7 +90,6 @@ class CANController : public Task
 		CanRxMsgTypeDef _rxMsg;
 		CanRxMsgTypeDef _rxMsgBuf[16];
 
-		//uint8_t _swMobsData[16][8];
 		Queue<uint8_t> _freeSwMobs;
 		Queue<uint8_t> _usedSwMobs;
 
@@ -111,7 +108,6 @@ class CANController : public Task
 		CANController(CANBus::channel_t channel);
 		void enableInterrupts(uint32_t interruptFlags);
 		void disableInterrupts(uint32_t interruptFlags);
-		void handleInterrupt();
 		void handleRx(void);
 		void notifyObservers(CanRxMsgTypeDef *msgHndle);
 

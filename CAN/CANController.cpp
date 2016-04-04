@@ -34,16 +34,6 @@
 
 #ifdef HAL_CAN_MODULE_ENABLED
 
-void CAN1IntHandler(void) {
-	CANController::_controllers[0]->handleInterrupt();
-}
-
-void CAN2IntHandler(void) {
-	CANController::_controllers[1]->handleInterrupt();
-}
-
-
-
 CANController::CANController(CANBus::channel_t channel) :
 	Task(0, 160),
 	_channel(channel),
@@ -236,28 +226,9 @@ void CANController::execute()
 		if (timeToWait>100) timeToWait = 100;
 
 		_usedSwMobs.peek(&num, timeToWait);
-		//delay_ms(timeToWait);
 
 	}
 }
-
-void CANController::handleInterrupt()
-{
-	HAL_CAN_IRQHandler(&_handle);
-}
-
-/*
-CANMessageObject* CANController::getMessageObject(uint8_t mob_id)
-{
-	if (mob_id<32)
-	{
-		return &_mobs[mob_id];
-	} else {
-		return 0;
-	}
-}
-*/
-
 
 void CANController::enable()
 {
@@ -657,15 +628,15 @@ void CANController::setTimeToWaitForFreeMob(uint32_t ms_to_wait)
 	_timeToWaitForFreeMob = ms_to_wait;
 }
 
-#ifdef STM32F0
 
 extern "C" {
 
+#ifdef STM32F0
 void CEC_CAN_IRQHandler(void)
 {
-	CAN1IntHandler();
+	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
 }
-
+#endif
 
 void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef *hcan)
 {
@@ -675,10 +646,7 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef *hcan)
 }
 
 }
-#endif
 
 #endif // HAL_CAN_MODULE_ENABLED
-
-
 
 
