@@ -267,8 +267,8 @@ bool CANController::sendMessage(CANMessage *msg)
 		_handle.pTxMsg->StdId = msg->id;
 	}
 
-	HAL_StatusTypeDef status = HAL_CAN_Transmit(&_handle, _timeToWaitForFreeMob);
-
+	//HAL_StatusTypeDef status = HAL_CAN_Transmit(&_handle, _timeToWaitForFreeMob);
+	HAL_StatusTypeDef status = HAL_CAN_Transmit_IT(&_handle);
 	return (status == HAL_OK);
 }
 
@@ -644,6 +644,12 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef *hcan)
 	CANController::_controllers[0]->handleRx();
 
 }
+
+void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef *hcan)
+{
+	UNUSED(hcan);
+}
+
 
 }
 
