@@ -184,12 +184,12 @@ void CANController::setup(CANBus::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpi
 	CAN_FilterConfTypeDef CAN_FilterInitStructure;
 
 	CAN_FilterInitStructure.FilterNumber=1;
-	CAN_FilterInitStructure.FilterMode=CAN_FILTERMODE_IDMASK;  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+	CAN_FilterInitStructure.FilterMode=CAN_FILTERMODE_IDMASK;
 
 	CAN_FilterInitStructure.FilterScale=CAN_FILTERSCALE_16BIT;
 	CAN_FilterInitStructure.FilterIdHigh=0x0000;
 	CAN_FilterInitStructure.FilterIdLow=0x0000;
-	CAN_FilterInitStructure.FilterMaskIdHigh=0x0000;  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+	CAN_FilterInitStructure.FilterMaskIdHigh=0x0000;
 
 	CAN_FilterInitStructure.FilterMaskIdLow=0x0000;
 	CAN_FilterInitStructure.FilterFIFOAssignment=CAN_FIFO0;
@@ -205,17 +205,17 @@ void CANController::setup(CANBus::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpi
 	switch(_channel) {
 #if defined HAS_CAN_CHANNEL_2
 	case CANBus::channel_1:
-		HAL_NVIC_SetPriority(CAN1_TX_IRQn, 3, 0);
-		HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 3, 0);
-		HAL_NVIC_SetPriority(CAN1_RX1_IRQn, 3, 0);
+		HAL_NVIC_SetPriority(CAN1_TX_IRQn, 5, 0);
+		HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 5, 0);
+		HAL_NVIC_SetPriority(CAN1_RX1_IRQn, 5, 0);
 		HAL_NVIC_EnableIRQ(CAN1_TX_IRQn);
 		HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
 		HAL_NVIC_EnableIRQ(CAN1_RX1_IRQn);
 		break;
 	case CANBus::channel_2:
-		HAL_NVIC_SetPriority(CAN2_TX_IRQn, 3, 0);
-		HAL_NVIC_SetPriority(CAN2_RX0_IRQn, 3, 0);
-		HAL_NVIC_SetPriority(CAN2_RX1_IRQn, 3, 0);
+		HAL_NVIC_SetPriority(CAN2_TX_IRQn, 5, 0);
+		HAL_NVIC_SetPriority(CAN2_RX0_IRQn, 5, 0);
+		HAL_NVIC_SetPriority(CAN2_RX1_IRQn, 5, 0);
 		HAL_NVIC_EnableIRQ(CAN2_TX_IRQn);
 		HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
 		HAL_NVIC_EnableIRQ(CAN2_RX1_IRQn);
@@ -644,7 +644,6 @@ void CANController::handleRx(void)
 	_freeSwMobs.receiveFromISR(&rxBufId);
 	memcpy (&_rxMsgBuf[rxBufId], _handle.pRxMsg, sizeof(CanRxMsgTypeDef));
 	_usedSwMobs.sendToBackFromISR(rxBufId);
-	__HAL_CAN_ENABLE_IT(&_handle, CAN_IT_FMP0); /* Enable 'message pending in FIFO0' interrupt */
 }
 
 void CANController::setSilent(bool beSilent)
@@ -664,8 +663,10 @@ extern "C" {
 void CEC_CAN_IRQHandler(void)
 {
 	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
+	__HAL_CAN_ENABLE_IT(&_handle, CAN_IT_FMP0); /* Enable 'message pending in FIFO0' interrupt */
 }
 #endif
+
 
 #ifdef STM32F4
 
@@ -674,39 +675,57 @@ void CAN1_TX_IRQHandler(void)
 	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
 }
 
-void CAN2_TX_IRQHandler(void)
-{
-	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
-}
-
 void CAN1_RX0_IRQHandler(void)
 {
 	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
+	__HAL_CAN_ENABLE_IT(&CANController::_controllers[0]->_handle, CAN_IT_FMP0); /* Enable 'message pending in FIFO0' interrupt */
 }
 
 void CAN1_RX1_IRQHandler(void)
 {
 	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
+	__HAL_CAN_ENABLE_IT(&CANController::_controllers[0]->_handle, CAN_IT_FMP1); /* Enable 'message pending in FIFO1' interrupt */
+}
+
+void CAN2_TX_IRQHandler(void)
+{
+	HAL_CAN_IRQHandler(&CANController::_controllers[1]->_handle);
 }
 
 void CAN2_RX0_IRQHandler(void)
 {
-	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
+	HAL_CAN_IRQHandler(&CANController::_controllers[1]->_handle);
+	__HAL_CAN_ENABLE_IT(&CANController::_controllers[1]->_handle, CAN_IT_FMP0); /* Enable 'message pending in FIFO0' interrupt */
 }
 
 void CAN2_RX1_IRQHandler(void)
 {
-	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
+	HAL_CAN_IRQHandler(&CANController::_controllers[1]->_handle);
+	__HAL_CAN_ENABLE_IT(&CANController::_controllers[1]->_handle, CAN_IT_FMP1); /* Enable 'message pending in FIFO1' interrupt */
 }
-
 
 #endif
 
+
 void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef *hcan)
 {
+
+#if defined (CAN)
 	UNUSED(hcan);
 	CANController::_controllers[0]->handleRx();
+#endif
 
+#if defined (CAN1)
+	if (hcan->Instance == CAN1) {
+		CANController::_controllers[0]->handleRx();
+	}
+#endif
+
+#if defined (CAN2)
+	if (hcan->Instance == CAN2) {
+		CANController::_controllers[1]->handleRx();
+	}
+#endif
 }
 
 void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef *hcan)
