@@ -663,7 +663,8 @@ extern "C" {
 void CEC_CAN_IRQHandler(void)
 {
 	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
-	__HAL_CAN_ENABLE_IT(&_handle, CAN_IT_FMP0); /* Enable 'message pending in FIFO0' interrupt */
+	__HAL_CAN_ENABLE_IT(&CANController::_controllers[0]->_handle, CAN_IT_FMP0); /* Enable 'message pending in FIFO0' interrupt */
+	__HAL_CAN_ENABLE_IT(&CANController::_controllers[0]->_handle, CAN_IT_FMP1); /* Enable 'message pending in FIFO1' interrupt */
 }
 #endif
 
