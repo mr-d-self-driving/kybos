@@ -32,23 +32,45 @@
 #include "GPIO.h"
 #include "kybos.h"
 
+#if defined (HAL_UART_MODULE_ENABLED)
+
 
 class UARTController
 {
-	friend void UART0IntHandler(void);
-	friend void UART1IntHandler(void);
-	friend void UART2IntHandler(void);
+	//friend void UART0IntHandler(void);
+	//friend void UART1IntHandler(void);
+	//friend void UART2IntHandler(void);
 
 	public:
 
-		void handleInterrupt();
+		//void handleInterrupt();
 
 		typedef enum {
-#ifdef UART0
-			controller_0,
-#endif
+#if defined (UART1) || defined (USART1)
 			controller_1,
-			controller_2
+#endif
+#if defined (UART2) || defined (USART2)
+			controller_2,
+#endif
+#if defined (UART3) || defined (USART3)
+			controller_3,
+#endif
+#if defined (UART4) || defined (USART4)
+			controller_4,
+#endif
+#if defined (UART5) || defined (USART5)
+			controller_5,
+#endif
+#if defined (UART6) || defined (USART6)
+			controller_6,
+#endif
+#if defined (UART7) || defined (USART7)
+			controller_7,
+#endif
+#if defined (UART8) || defined (USART8)
+			controller_8,
+#endif
+			num_uart_controllers
 		} controller_num_t;
 
 		typedef enum {
@@ -89,15 +111,15 @@ class UARTController
 
 	private:
 		controller_num_t _num;
-		uint32_t _periph;
-		uint32_t _base;
+		//uint32_t _periph;
+		//uint32_t _base;
 
 		Queue<uint8_t> _queue;
 		RecursiveMutex _mutex;
 
-		static UARTController *_instances[3];
+		static UARTController *_instances[num_uart_controllers];
 		UARTController(controller_num_t num);
-		UARTController(uint8_t portNumber, uint32_t periph, uint32_t base);
+		//UARTController(uint8_t portNumber, uint32_t periph, uint32_t base);
 
 		bool _enabled;
 		uint32_t _baudrate;
@@ -106,20 +128,21 @@ class UARTController
 		stopbits_t _stopbits;
 		bool _useRxInterrupt;
 
+		UART_HandleTypeDef _handle;
 
 	public:
 
 		static UARTController *get(controller_num_t num);
 
 		RecursiveMutex *getMutex();
-		void enablePeripheral();
+		//void enablePeripheral();
 		void enable();
 		void disable();
 
 		void setup(GPIOPin rxpin=GPIOPin::invalid, GPIOPin txpin=GPIOPin::invalid, uint32_t baudrate=115200, wordlength_t wordLength=wordlength_8bit, parity_t parity=parity_none, stopbits_t stopbits=stopbits_1, bool use_rx_interrupt=true);
 
-		void setupLinMaster(uint32_t baudrate, GPIOPin rxpin, GPIOPin txpin);
-		void setupLinSlave(uint32_t baudrate, GPIOPin rxpin, GPIOPin txpin);
+		//void setupLinMaster(uint32_t baudrate, GPIOPin rxpin, GPIOPin txpin);
+		//void setupLinSlave(uint32_t baudrate, GPIOPin rxpin, GPIOPin txpin);
 		void setLineParameters(uint32_t baudrate, wordlength_t wordLength, parity_t parity, stopbits_t stopbits);
 		uint32_t getBaudrate();
 		wordlength_t getWordLength();
@@ -136,28 +159,28 @@ class UARTController
 		void putChar(uint8_t c);
 		uint8_t getChar();
 
-		void enableFIFO();
-		void disableFIFO();
-		void setFIFOTxLevel(fifo_tx_level_t level);
-		void setFIFORxLevel(fifo_rx_level_t level);
-		fifo_tx_level_t getFIFOTxLevel();
-		fifo_rx_level_t getFIFORxLevel();
-		bool isFIFOCharAvail();
-		bool isFIFOSpaceAvail();
+		//void enableFIFO();
+		//void disableFIFO();
+		//void setFIFOTxLevel(fifo_tx_level_t level);
+		//void setFIFORxLevel(fifo_rx_level_t level);
+		//fifo_tx_level_t getFIFOTxLevel();
+		//fifo_rx_level_t getFIFORxLevel();
+		//bool isFIFOCharAvail();
+		//bool isFIFOSpaceAvail();
 		void putCharNonblocking(uint8_t c);
 		int16_t getCharNonBlocking();
 		int16_t getCharTimeout(uint32_t timeout);
 
-		void enableSIR(bool lowPower); // disable() enableSIR(); enable()
-		void disableSIR();
+		//void enableSIR(bool lowPower); // disable() enableSIR(); enable()
+		//void disableSIR();
 
 
 
-		uint32_t getRxError();
-		void clearRxError();
+		//uint32_t getRxError();
+		//void clearRxError();
 
-		void enableSmartCard();
-		void disableSmartCard();
+		//void enableSmartCard();
+		//void disableSmartCard();
 
 		// TODO: UARTClockSource
 		// todo: intEnable, intDisable, intRegister, intUnregister, intStatus, intClear, txIntMode
@@ -182,5 +205,7 @@ class UARTController
 		int readLine(const void *buf, int bufSize);
 
 };
+
+#endif // defined (HAL_UART_MODULE_ENABLED)
 
 #endif /* UART_H_ */

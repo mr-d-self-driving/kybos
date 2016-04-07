@@ -12,6 +12,67 @@
 
 #ifdef STM32F429xx
 
+#if defined (HAL_UART_MODULE_ENABLED)
+
+void GPIOPin::mapAsU1RX()
+{
+}
+void GPIOPin::mapAsU1TX()
+{
+}
+
+void GPIOPin::mapAsU2RX()
+{
+}
+void GPIOPin::mapAsU2TX()
+{
+}
+
+void GPIOPin::mapAsU3RX()
+{
+}
+void GPIOPin::mapAsU3TX()
+{
+}
+
+void GPIOPin::mapAsU4RX()
+{
+}
+void GPIOPin::mapAsU4TX()
+{
+}
+
+void GPIOPin::mapAsU5RX()
+{
+}
+void GPIOPin::mapAsU5TX()
+{
+}
+
+void GPIOPin::mapAsU6RX()
+{
+}
+void GPIOPin::mapAsU6TX()
+{
+}
+
+void GPIOPin::mapAsU7RX()
+{
+}
+void GPIOPin::mapAsU7TX()
+{
+}
+
+void GPIOPin::mapAsU8RX()
+{
+}
+void GPIOPin::mapAsU8TX()
+{
+}
+
+#endif // defined (HAL_UART_MODULE_ENABLED)
+
+
 #ifdef HAL_CAN_MODULE_ENABLED
 void GPIOPin::mapAsCAN1RX()
 {

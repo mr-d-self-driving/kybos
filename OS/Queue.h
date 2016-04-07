@@ -167,7 +167,7 @@ template <class T> class Queue
 		 *  @param name the name for the queue in the registry
 	 	 */
 		void addToRegistry(char* name) {
-			vQueueAddToRegistry(_hnd, (signed char*) name);
+			vQueueAddToRegistry(_hnd, (const char*) name);
 		}
 
 };

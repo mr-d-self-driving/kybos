@@ -167,6 +167,22 @@ public:
 	void mapAsI2C2SCL();
 	void mapAsI2C3SCL();
 
+	void mapAsU1RX();
+	void mapAsU1TX();
+	void mapAsU2RX();
+	void mapAsU2TX();
+	void mapAsU3RX();
+	void mapAsU3TX();
+	void mapAsU4RX();
+	void mapAsU4TX();
+	void mapAsU5RX();
+	void mapAsU5TX();
+	void mapAsU6RX();
+	void mapAsU6TX();
+	void mapAsU7RX();
+	void mapAsU7TX();
+	void mapAsU8RX();
+	void mapAsU8TX();
 
 };
 
