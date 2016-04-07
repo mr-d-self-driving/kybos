@@ -30,6 +30,8 @@
 #include "OS/Queue.h"
 #include "OS/RecursiveMutex.h"
 #include "GPIO.h"
+#include "kybos.h"
+
 
 class UARTController
 {
@@ -42,7 +44,9 @@ class UARTController
 		void handleInterrupt();
 
 		typedef enum {
+#ifdef UART0
 			controller_0,
+#endif
 			controller_1,
 			controller_2
 		} controller_num_t;

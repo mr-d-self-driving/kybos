@@ -27,7 +27,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 
 #include "OS/Mutex.h"
 #include "OS/Task.h"
@@ -59,7 +58,7 @@ void UART2IntHandler(void) {
 
 UARTController::UARTController(controller_num_t num) :
 	_num(num),
-	_queue(OPENSTELLA_UART_QUEUESIZE),
+	_queue(32),
 	_enabled(false),
 	_baudrate(115200),
 	_wordlength(wordlength_8bit),
