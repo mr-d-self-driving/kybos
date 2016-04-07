@@ -8,8 +8,6 @@
 #include "GPIO.h"
 #include "kybos.h"
 
-//#include <stm32l1xx_hal_rcc.h>
-#include GENERATE_HAL_INCLUDE(STM32_FAMILY, _rcc)
 
 #ifdef HAS_GPIO_A
 GPIOPort GPIO::A = GPIOPort(0);

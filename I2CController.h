@@ -19,13 +19,13 @@
 class I2CController {
 public:
 	typedef enum {
-#ifdef HAS_I2C1
+#if defined (I2C1)
 		I2CController1,
 #endif
-#ifdef HAS_I2C2
+#if defined (I2C2)
 		I2CController2,
 #endif
-#ifdef HAS_I2C3
+#if defined (I2C3)
 		I2CController3,
 #endif
 		numI2CControllers
@@ -41,12 +41,11 @@ public:
 	static I2CController *get(i2cController_t controller);
 
 private:
-	//I2CController(I2C_TypeDef *base);
 	I2CController(i2cController_t controller);
 	I2C_HandleTypeDef _handle;
 
 	RecursiveMutex _lock;
-	//HAL_StatusTypeDef statusDef;
+
 	static I2CController* init(i2cController_t controller);
 	static I2CController* _i2cControllers[numI2CControllers];
 

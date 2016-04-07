@@ -23,16 +23,6 @@
 #include <stdint.h>
 #include "kybos.h"
 
-//#include "stm32l1xx_hal.h"
-#include GENERATE_HAL_INCLUDE(STM32_FAMILY,)
-
-//#include "stm32l1xx_hal_rcc.h"
-#include GENERATE_HAL_INCLUDE(STM32_FAMILY, _rcc)
-//#include "stm32l1xx_hal_pwr.h"
-#include GENERATE_HAL_INCLUDE(STM32_FAMILY, _pwr)
-//#include "stm32l1xx_hal_flash.h"
-#include GENERATE_HAL_INCLUDE(STM32_FAMILY, _flash)
-//#include "cmsis_os.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"

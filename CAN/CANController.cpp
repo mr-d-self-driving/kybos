@@ -23,11 +23,6 @@
 
 #include "../kybos.h"
 
-#include GENERATE_HAL_INCLUDE(STM32_FAMILY,)
-#include GENERATE_HAL_INCLUDE(STM32_FAMILY, _rcc)
-#include GENERATE_HAL_INCLUDE(STM32_FAMILY, _rcc_ex)
-#include GENERATE_HAL_INCLUDE(STM32_FAMILY, _can)
-
 #include "CANController.h"
 #include <string.h>
 #include "../OS/Mutex.h"
@@ -45,10 +40,10 @@ CANController::CANController(CANBus::channel_t channel) :
 	_pool(20)
 {
 	static const char* tasknames[CANBus::num_channels] = {
-#ifdef HAS_CAN_CHANNEL_1
+#ifdef CAN1
 			"can1"
 #endif
-#ifdef HAS_CAN_CHANNEL_2
+#ifdef CAN2
 			"can2",
 #endif
 	 };
@@ -151,7 +146,7 @@ void CANController::setup(CANBus::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpi
 	_handle.Lock = HAL_UNLOCKED;
 
 	switch(_channel) {
-#if defined HAS_CAN_CHANNEL_2
+#if defined CAN2
 	case CANBus::channel_1:
 		_handle.Instance = CAN1;
 		rxpin.mapAsCAN1RX();
@@ -165,7 +160,7 @@ void CANController::setup(CANBus::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpi
 		__HAL_RCC_CAN1_CLK_ENABLE(); // For CAN2, we need CAN1 clock also!
 		__HAL_RCC_CAN2_CLK_ENABLE();
 		break;
-#elif defined HAS_CAN_CHANNEL_1
+#elif defined CAN
 	case CANBus::channel_1:
 		_handle.Instance = CAN;
 		rxpin.mapAsCAN1RX();
@@ -203,7 +198,7 @@ void CANController::setup(CANBus::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpi
 
 
 	switch(_channel) {
-#if defined HAS_CAN_CHANNEL_2
+#if defined (CAN2)
 	case CANBus::channel_1:
 		HAL_NVIC_SetPriority(CAN1_TX_IRQn, 5, 0);
 		HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 5, 0);
@@ -220,7 +215,7 @@ void CANController::setup(CANBus::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpi
 		HAL_NVIC_EnableIRQ(CAN2_RX0_IRQn);
 		HAL_NVIC_EnableIRQ(CAN2_RX1_IRQn);
 		break;
-#elif defined HAS_CAN_CHANNEL_1
+#elif defined (CAN)
 	case CANBus::channel_1:
 #if defined(STM32F0)
 		HAL_NVIC_SetPriority(CEC_CAN_IRQn, 3, 0); /* Set CAN1 Rx interrupt priority to 3-0 */
@@ -311,12 +306,12 @@ CANController *CANController::get(CANBus::channel_t channel)
 	{
 		switch (channel) {
 
-#ifdef HAS_CAN_CHANNEL_1
+#ifdef CAN1
 			case CANBus::channel_1:
 				break;
 #endif
 
-#ifdef HAS_CAN_CHANNEL_2
+#ifdef CAN2
 			case CANBus::channel_2:
 				break;
 #endif

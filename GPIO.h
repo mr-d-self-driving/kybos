@@ -10,9 +10,8 @@
 
 #include "kybos.h"
 
-#include <cmsis_device.h>
-
-#include GENERATE_HAL_INCLUDE(STM32_FAMILY, _gpio)
+//#include <cmsis_device.h>
+//#include GENERATE_HAL_INCLUDE(STM32_FAMILY, _gpio)
 
 
 class GPIOPin;

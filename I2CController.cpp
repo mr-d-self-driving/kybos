@@ -24,20 +24,11 @@
 #include "I2CController.h"
 #include "kybos.h"
 
-//#include <stm32l1xx_hal_def.h>
-#include GENERATE_HAL_INCLUDE(STM32_FAMILY, _def)
-//#include <stm32l1xx_hal_i2c.h>
-#include GENERATE_HAL_INCLUDE(STM32_FAMILY, _dma)
-#include GENERATE_HAL_INCLUDE(STM32_FAMILY, _i2c)
-
-#include <cmsis_device.h>
-
-//#include <stm32l1xx_hal_gpio_ex.h> // For GPIO AF macros
 #include "GPIO.h"
 
 #ifdef HAL_I2C_MODULE_ENABLED
 
-I2CController* I2CController::_i2cControllers[] = {0, 0};
+I2CController* I2CController::_i2cControllers[] = {0, };
 
 
 
@@ -93,12 +84,21 @@ I2CController::I2CController(i2cController_t controller)
 	I2C_TypeDef* base;
 
 	switch (controller) {
+#if defined (I2C1)
 	case I2CController1:
 		base = I2C1;
 		break;
+#endif
+#if defined (I2C1)
 	case I2CController2:
 		base = I2C2;
 		break;
+#endif
+#if defined (I2C1)
+	case I2CController3:
+		base = I2C3;
+		break;
+#endif
 	default:
 		while (1) { ; }
 	}
@@ -121,19 +121,19 @@ int I2CController::setup(GPIOPin sda, GPIOPin scl)
 	//uint32_t af;
 
 	switch (_controller) {
-#ifdef HAS_I2C1
+#ifdef I2C1
 	case I2CController1:
 		sda.mapAsI2C1SDA();
 		scl.mapAsI2C1SCL();
 		break;
 #endif
-#ifdef HAS_I2C2
+#ifdef I2C2
 	case I2CController2:
 		sda.mapAsI2C2SDA();
 		scl.mapAsI2C2SCL();
 		break;
 #endif
-#ifdef HAS_I2C3
+#ifdef I2C3
 	case I2CController3:
 		sda.mapAsI2C3SDA();
 		scl.mapAsI2C3SCL();
@@ -145,9 +145,6 @@ int I2CController::setup(GPIOPin sda, GPIOPin scl)
 		break;
 
 	}
-
-	//sda.configure(GPIOPin::GPIO_AF_OD, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, (GPIOPin::gpio_afconfig_t) af);
-	//scl.configure(GPIOPin::GPIO_AF_OD, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, (GPIOPin::gpio_afconfig_t) af);
 
 	return ret;
 }
@@ -184,7 +181,27 @@ int I2CController::configure(i2cMode_t mode, uint32_t speed)
 	RCC_PeripCLKInitStruct.I2c1ClockSelection = RCC_I2C1CLKSOURCE_SYSCLK;
 	HAL_RCCEx_GetPeriphCLKConfig(&RCC_PeripCLKInitStruct);
 */
-	__I2C1_CLK_ENABLE();
+
+	switch (_controller) {
+#if defined (I2C1)
+	case I2CController1:
+		__I2C1_CLK_ENABLE();
+		break;
+#endif
+#if defined (I2C2)
+	case I2CController2:
+		__I2C2_CLK_ENABLE();
+		break;
+#endif
+#if defined (I2C3)
+	case I2CController3:
+		__I2C3_CLK_ENABLE();
+		break;
+#endif
+	default:
+		while (1) { ; }
+		break;
+	}
 
 
 	ret = HAL_I2C_Init(&_handle);

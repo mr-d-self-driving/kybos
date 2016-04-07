@@ -23,13 +23,13 @@
 #ifndef KYBOS_H_
 #define KYBOS_H_
 
-
 #if defined (STM32L100xB) || defined (STM32L100xBA) || defined (STM32L100xC) || \
     defined (STM32L151xB) || defined (STM32L151xBA) || defined (STM32L151xC) || defined (STM32L151xCA) || defined (STM32L151xD) || defined (STM32L151xDX) || defined (STM32L151xE) || \
     defined (STM32L152xB) || defined (STM32L152xBA) || defined (STM32L152xC) || defined (STM32L152xCA) || defined (STM32L152xD) || defined (STM32L152xDX) || defined (STM32L152xE) || \
     defined (STM32L162xC) || defined (STM32L162xCA) || defined (STM32L162xD) || defined (STM32L162xDX) || defined (STM32L162xE)
 
 	#define STM32_FAMILY stm32l1xx
+	#include <stm32l1xx.h>
 
 #elif defined (STM32F405xx) || defined (STM32F415xx) || defined (STM32F407xx) || defined (STM32F417xx) || \
     defined (STM32F427xx) || defined (STM32F437xx) || defined (STM32F429xx) || defined (STM32F439xx) || \
@@ -37,12 +37,15 @@
 
 
 	#define STM32_FAMILY stm32f4xx
+	#include <stm32f4xx.h>
 
 #elif defined (STM32F072)
 
 	#define STM32_FAMILY stm32f0xx
+	#include <stm32f0xx.h>
 
 #endif
+
 
 #if defined (STM32F429xx)
 
@@ -93,27 +96,13 @@
 #define HAS_GPIO_F
 #endif
 
+
 #if defined (STM32L100xB) || defined (STM32L100xBA) || defined (STM32L100xC) ||\
     defined (STM32L152xB) || defined (STM32L152xBA) || defined (STM32L152xC) || defined (STM32L152xCA) || defined (STM32L152xD) || defined (STM32L152xE) || defined (STM32L152xDX) ||\
     defined (STM32L162xC) || defined (STM32L162xCA) || defined (STM32L162xD) || defined (STM32L162xE) || defined (STM32L162xDX)
 #define HAS_LCD_CONTROLLER
 #endif
 
-
-#if defined (STM32F429xx)
-	#define HAS_I2C1
-	#define HAS_I2C2
-	#define HAS_I2C3
-#endif
-
-#if defined (STM32F429xx)
-	#define HAS_CAN_CHANNEL_1
-	#define HAS_CAN_CHANNEL_2
-#endif
-
-#if defined (STM32F072xB)
-	#define HAS_CAN_CHANNEL_1
-#endif
 
 // This macro is used to generate include paths
 // as HAL file names are generally based on the STM32 family's name
@@ -122,9 +111,8 @@
 // GENERATE_HAL_INCLUDE(STM32_FAMILY, rcc)
 // expands to:
 // #include <stm32l1xx_hal_rcc.h>
-#define GENERATE_HAL_INCLUDE(family, module) GENERATE_HAL_INCLUDE_xpand(family, module)
-#define GENERATE_HAL_INCLUDE_xpand(family, module) <family##_hal##module.h>
-
+//#define GENERATE_HAL_INCLUDE(family, module) GENERATE_HAL_INCLUDE_xpand(family, module)
+//#define GENERATE_HAL_INCLUDE_xpand(family, module) <family##_hal##module.h>
 
 
 #endif // KYBOS_H_

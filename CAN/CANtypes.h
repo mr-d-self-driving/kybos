@@ -31,10 +31,10 @@
 namespace CANBus {
 
 	typedef enum {
-#ifdef HAS_CAN_CHANNEL_1
+#if defined (CAN1) || defined (CAN)
 		channel_1,
 #endif
-#ifdef HAS_CAN_CHANNEL_2
+#if defined (CAN2)
 		channel_2,
 #endif
 		num_channels
