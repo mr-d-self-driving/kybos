@@ -74,40 +74,38 @@ class UARTController
 		} controller_num_t;
 
 		typedef enum {
-			wordlength_5bit = 0x00,
-			wordlength_6bit = 0x20,
-			wordlength_7bit = 0x40,
-			wordlength_8bit = 0x60,
+#if defined (UART_WORDLENGTH_5B)
+			wordlength_5bit = UART_WORDLENGTH_5B,
+#endif
+#if defined (UART_WORDLENGTH_6B)
+			wordlength_6bit = UART_WORDLENGTH_6B,
+#endif
+#if defined (UART_WORDLENGTH_7B)
+			wordlength_7bit = UART_WORDLENGTH_7B,
+#endif
+#if defined (UART_WORDLENGTH_8B)
+			wordlength_8bit = UART_WORDLENGTH_8B,
+#endif
+#if defined (UART_WORDLENGTH_9B)
+			wordlength_9bit = UART_WORDLENGTH_9B,
+#endif
 		} wordlength_t;
 
 		typedef enum {
-			parity_none = 0x00,
-			parity_even = 0x06,
-			parity_odd  = 0x02,
+			parity_none = UART_PARITY_NONE,
+			parity_even = UART_PARITY_EVEN,
+			parity_odd  = UART_PARITY_ODD,
+/*
 			parity_one  = 0x82,
 			parity_zero = 0x86
+*/
 		} parity_t;
 
 		typedef enum {
-			stopbits_1 = 0x00,
-			stopbits_2 = 0x08
+			stopbits_1 = UART_STOPBITS_1,
+			stopbits_2 = UART_STOPBITS_2
 		} stopbits_t;
 
-		typedef enum {
-			fifo_tx_level_1_8 = 0x00,
-			fifo_tx_level_2_8 = 0x01,
-			fifo_tx_level_4_8 = 0x02,
-			fifo_tx_level_6_8 = 0x03,
-			fifo_tx_level_7_8 = 0x04
-		} fifo_tx_level_t;
-
-		typedef enum {
-			fifo_rx_level_1_8 = 0x00,
-			fifo_rx_level_2_8 = 0x08,
-			fifo_rx_level_4_8 = 0x10,
-			fifo_rx_level_6_8 = 0x18,
-			fifo_rx_level_7_8 = 0x20
-		} fifo_rx_level_t;
 
 	private:
 		controller_num_t _num;

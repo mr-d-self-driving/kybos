@@ -192,13 +192,35 @@ void UARTController::disable()
 
 void UARTController::setup(GPIOPin rxpin, GPIOPin txpin, uint32_t baudrate, wordlength_t wordLength, parity_t parity, stopbits_t stopbits, bool use_rx_interrupt)
 {
+	RecursiveMutexGuard guard(&_mutex);
+
+
 	_useRxInterrupt = use_rx_interrupt;
-	//enablePeripheral();
+
+	_handle.Init.BaudRate = baudrate;
+	_handle.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	if (rxpin.isValid() && txpin.isValid()) {
+		_handle.Init.Mode = UART_MODE_TX_RX;
+	}
+	else if (rxpin.isValid()) {
+		_handle.Init.Mode = UART_MODE_RX;
+	}
+	else if (txpin.isValid()) {
+		_handle.Init.Mode = UART_MODE_TX;
+	}
+	else {
+		while (1) { ; }  // wth?
+	}
+	_handle.Init.OverSampling = UART_OVERSAMPLING_16;
+	_handle.Init.Parity = parity;
+	_handle.Init.StopBits = stopbits;
+	_handle.Init.WordLength = wordLength;
 
 	switch (_num) {
+#if defined (UART1) || defined (USART1)
 		case controller_1:
-			rxpin.mapAsU1RX();
-			txpin.mapAsU1TX();
+			if ( rxpin.isValid()) { rxpin.mapAsU1RX(); }
+			if ( txpin.isValid()) { txpin.mapAsU1TX(); }
 			if (_useRxInterrupt) {
 				/*
 				UARTIntRegister(UART1_BASE, UART1IntHandler);
@@ -207,9 +229,11 @@ void UARTController::setup(GPIOPin rxpin, GPIOPin txpin, uint32_t baudrate, word
 				*/
 			}
 			break;
+#endif
+#if defined (UART2) || defined (USART2)
 		case controller_2:
-			rxpin.mapAsU2RX();
-			txpin.mapAsU2TX();
+			if ( rxpin.isValid()) { rxpin.mapAsU2RX(); }
+			if ( txpin.isValid()) { txpin.mapAsU2TX(); }
 			if (_useRxInterrupt) {
 				/*
 				UARTIntRegister(UART2_BASE, UART2IntHandler);
@@ -217,6 +241,88 @@ void UARTController::setup(GPIOPin rxpin, GPIOPin txpin, uint32_t baudrate, word
 				MAP_IntEnable(INT_UART2);
 				*/
 			}
+			break;
+#endif
+#if defined (UART3) || defined (USART3)
+		case controller_3:
+			if ( rxpin.isValid()) { rxpin.mapAsU3RX(); }
+			if ( txpin.isValid()) { txpin.mapAsU3TX(); }
+			if (_useRxInterrupt) {
+				/*
+				UARTIntRegister(UART2_BASE, UART2IntHandler);
+				MAP_IntPrioritySet(INT_UART2, configDEFAULT_SYSCALL_INTERRUPT_PRIORITY);
+				MAP_IntEnable(INT_UART2);
+				*/
+			}
+			break;
+#endif
+#if defined (UART4) || defined (USART4)
+		case controller_4:
+			if ( rxpin.isValid()) { rxpin.mapAsU4RX(); }
+			if ( txpin.isValid()) { txpin.mapAsU4TX(); }
+			if (_useRxInterrupt) {
+				/*
+				UARTIntRegister(UART2_BASE, UART2IntHandler);
+				MAP_IntPrioritySet(INT_UART2, configDEFAULT_SYSCALL_INTERRUPT_PRIORITY);
+				MAP_IntEnable(INT_UART2);
+				*/
+			}
+			break;
+#endif
+#if defined (UART5) || defined (USART5)
+		case controller_5:
+			if ( rxpin.isValid()) { rxpin.mapAsU5RX(); }
+			if ( txpin.isValid()) { txpin.mapAsU5TX(); }
+			if (_useRxInterrupt) {
+				/*
+				UARTIntRegister(UART2_BASE, UART2IntHandler);
+				MAP_IntPrioritySet(INT_UART2, configDEFAULT_SYSCALL_INTERRUPT_PRIORITY);
+				MAP_IntEnable(INT_UART2);
+				*/
+			}
+			break;
+#endif
+#if defined (UART6) || defined (USART6)
+		case controller_6:
+			if ( rxpin.isValid()) { rxpin.mapAsU6RX(); }
+			if ( txpin.isValid()) { txpin.mapAsU6TX(); }
+			if (_useRxInterrupt) {
+				/*
+				UARTIntRegister(UART2_BASE, UART2IntHandler);
+				MAP_IntPrioritySet(INT_UART2, configDEFAULT_SYSCALL_INTERRUPT_PRIORITY);
+				MAP_IntEnable(INT_UART2);
+				*/
+			}
+			break;
+#endif
+#if defined (UART7) || defined (USART7)
+		case controller_7:
+			if ( rxpin.isValid()) { rxpin.mapAsU7RX(); }
+			if ( txpin.isValid()) { txpin.mapAsU7TX(); }
+			if (_useRxInterrupt) {
+				/*
+				UARTIntRegister(UART2_BASE, UART2IntHandler);
+				MAP_IntPrioritySet(INT_UART2, configDEFAULT_SYSCALL_INTERRUPT_PRIORITY);
+				MAP_IntEnable(INT_UART2);
+				*/
+			}
+			break;
+#endif
+#if defined (UART8) || defined (USART8)
+		case controller_8:
+			if ( rxpin.isValid()) { rxpin.mapAsU8RX(); }
+			if ( txpin.isValid()) { txpin.mapAsU8TX(); }
+			if (_useRxInterrupt) {
+				/*
+				UARTIntRegister(UART2_BASE, UART2IntHandler);
+				MAP_IntPrioritySet(INT_UART2, configDEFAULT_SYSCALL_INTERRUPT_PRIORITY);
+				MAP_IntEnable(INT_UART2);
+				*/
+			}
+			break;
+#endif
+		default:
+			while (1) { ; }
 			break;
 	}
 
@@ -479,7 +585,7 @@ int UARTController::readUntil(const void *buf, int bufSize, const void * const t
 {
 	uint8_t *data = (uint8_t *) buf;
 	uint8_t *t = (uint8_t *) terminator;
-	bool terminated;
+	bool terminated=false;
 	int numRead;
 
 	for ( numRead = 1; bufSize > 0; bufSize--) {
