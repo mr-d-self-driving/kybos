@@ -14,61 +14,310 @@
 
 #if defined (HAL_UART_MODULE_ENABLED)
 
+#if defined (UART1) || defined (USART1)
 void GPIOPin::mapAsU1RX()
 {
+	GPIOPin::gpio_afconfig_t afconfig;
+	switch(_portPin) {
+	case 0x0A:  // port A, pin 10
+	case 0x17:  // port B, pin 7
+#if defined (UART1)
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF7_UART1;
+#else // defined (USART1)
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF7_USART1;
+#endif
+		break;
+	default:
+		while (1) { ; }
+	}
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_PULL_UP, GPIOPin::GPIO_SPD_HIGH, afconfig);
 }
+
 void GPIOPin::mapAsU1TX()
 {
+	GPIOPin::gpio_afconfig_t afconfig;
+	switch(_portPin) {
+	case 0x09:  // port A, pin 9
+	case 0x16:  // port B, pin 6
+#if defined (UART1)
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF7_UART1;
+#else // defined (USART1)
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF7_USART1;
+#endif
+		break;
+	default:
+		while (1) { ; }
+	}
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_PULL_UP, GPIOPin::GPIO_SPD_HIGH, afconfig);
 }
+#endif
 
+#if defined (UART2) || defined (USART2)
 void GPIOPin::mapAsU2RX()
 {
+	GPIOPin::gpio_afconfig_t afconfig;
+	switch(_portPin) {
+	case 0x03:  // port A, pin 3
+	case 0x36:  // port D, pin 6
+#if defined (UART2)
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF7_UART2;
+#else
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF7_USART2;
+#endif
+		break;
+	default:
+		while (1) { ; }
+	}
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_PULL_UP, GPIOPin::GPIO_SPD_HIGH, afconfig);
 }
+
 void GPIOPin::mapAsU2TX()
 {
+	GPIOPin::gpio_afconfig_t afconfig;
+	switch(_portPin) {
+	case 0x02:  // port A, pin 2
+	case 0x35:  // port D, pin 5
+#if defined (UART2)
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF7_UART2;
+#else
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF7_USART2;
+#endif
+		break;
+	default:
+		while (1) { ; }
+	}
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_PULL_UP, GPIOPin::GPIO_SPD_HIGH, afconfig);
 }
+#endif
 
+#if defined (UART3) || defined (USART3)
 void GPIOPin::mapAsU3RX()
 {
+	GPIOPin::gpio_afconfig_t afconfig;
+	switch(_portPin) {
+	case 0x1B:  // port B, pin 11
+	case 0x2B:  // port C, pin 11
+	case 0x39:  // port D, pin 9
+#if defined (UART3)
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF7_UART3;
+#else
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF7_USART3;
+#endif
+		break;
+	default:
+		while (1) { ; }
+	}
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_PULL_UP, GPIOPin::GPIO_SPD_HIGH, afconfig);
 }
+
 void GPIOPin::mapAsU3TX()
 {
+	GPIOPin::gpio_afconfig_t afconfig;
+	switch(_portPin) {
+	case 0x1A:  // port B, pin 10
+	case 0x2A:  // port C, pin 10
+	case 0x38:  // port D, pin 8
+#if defined (UART3)
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF7_UART3;
+#else
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF7_USART3;
+#endif
+		break;
+	default:
+		while (1) { ; }
+	}
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_PULL_UP, GPIOPin::GPIO_SPD_HIGH, afconfig);
 }
+#endif
 
+
+#if defined (UART4) || defined (USART4)
 void GPIOPin::mapAsU4RX()
 {
+	GPIOPin::gpio_afconfig_t afconfig;
+	switch(_portPin) {
+	case 0x01:  // port A, pin 1
+	case 0x2B:  // port C, pin 11
+#if defined (UART4)
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_UART4;
+#else
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_USART4;
+#endif
+		break;
+	default:
+		while (1) { ; }
+	}
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_PULL_UP, GPIOPin::GPIO_SPD_HIGH, afconfig);
 }
+
 void GPIOPin::mapAsU4TX()
 {
+	GPIOPin::gpio_afconfig_t afconfig;
+	switch(_portPin) {
+	case 0x00:  // port A, pin 0
+	case 0x2A:  // port C, pin 10
+#if defined (UART4)
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_UART4;
+#else
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_USART4;
+#endif
+		break;
+	default:
+		while (1) { ; }
+	}
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_PULL_UP, GPIOPin::GPIO_SPD_HIGH, afconfig);
 }
+#endif
 
+#if defined (UART5) || defined (USART5)
 void GPIOPin::mapAsU5RX()
 {
+	GPIOPin::gpio_afconfig_t afconfig;
+	switch(_portPin) {
+	case 0x32:  // port D, pin 2
+#if defined (UART5)
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_UART5;
+#else
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_USART5;
+#endif
+		break;
+	default:
+		while (1) { ; }
+	}
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_PULL_UP, GPIOPin::GPIO_SPD_HIGH, afconfig);
 }
+
 void GPIOPin::mapAsU5TX()
 {
+	GPIOPin::gpio_afconfig_t afconfig;
+	switch(_portPin) {
+	case 0x2C:  // port C, pin 12
+#if defined (UART5)
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_UART5;
+#else
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_USART5;
+#endif
+		break;
+	default:
+		while (1) { ; }
+	}
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_PULL_UP, GPIOPin::GPIO_SPD_HIGH, afconfig);
 }
+#endif
 
+
+#if defined (UART6) || defined (USART6)
 void GPIOPin::mapAsU6RX()
 {
-}
-void GPIOPin::mapAsU6TX()
-{
+	GPIOPin::gpio_afconfig_t afconfig;
+	switch(_portPin) {
+	case 0x27:  // port C, pin 7
+	case 0x69:  // port G, pin 9
+#if defined (UART6)
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_UART6;
+#else
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_USART6;
+#endif
+		break;
+	default:
+		while (1) { ; }
+	}
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_PULL_UP, GPIOPin::GPIO_SPD_HIGH, afconfig);
 }
 
+void GPIOPin::mapAsU6TX()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	switch(_portPin) {
+	case 0x26:  // port C, pin 6
+	case 0x6E:  // port G, pin 14
+#if defined (UART6)
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_UART6;
+#else
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_USART6;
+#endif
+		break;
+	default:
+		while (1) { ; }
+	}
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_PULL_UP, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+#endif
+
+
+#if defined (UART7) || defined (USART7)
 void GPIOPin::mapAsU7RX()
 {
+	GPIOPin::gpio_afconfig_t afconfig;
+	switch(_portPin) {
+	case 0x47:  // port E, pin 7
+	case 0x56:  // port F, pin 6
+#if defined (UART7)
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_UART7;
+#else
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_USART7;
+#endif
+		break;
+	default:
+		while (1) { ; }
+	}
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_PULL_UP, GPIOPin::GPIO_SPD_HIGH, afconfig);
 }
 void GPIOPin::mapAsU7TX()
 {
+	GPIOPin::gpio_afconfig_t afconfig;
+	switch(_portPin) {
+	case 0x48:  // port E, pin 8
+	case 0x57:  // port F, pin 7
+#if defined (UART7)
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_UART7;
+#else
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_USART7;
+#endif
+		break;
+	default:
+		while (1) { ; }
+	}
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_PULL_UP, GPIOPin::GPIO_SPD_HIGH, afconfig);
 }
+#endif
 
+
+#if defined (UART8) || defined (USART8)
 void GPIOPin::mapAsU8RX()
 {
+	GPIOPin::gpio_afconfig_t afconfig;
+	switch(_portPin) {
+	case 0x40:  // port E, pin 0
+#if defined (UART8)
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_UART8;
+#else
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_USART8;
+#endif
+		break;
+	default:
+		while (1) { ; }
+	}
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_PULL_UP, GPIOPin::GPIO_SPD_HIGH, afconfig);
 }
+
 void GPIOPin::mapAsU8TX()
 {
+	GPIOPin::gpio_afconfig_t afconfig;
+	switch(_portPin) {
+	case 0x41:  // port E, pin 1
+#if defined (UART8)
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_UART8;
+#else
+		afconfig = (GPIOPin::gpio_afconfig_t) GPIO_AF8_USART8;
+#endif
+		break;
+	default:
+		while (1) { ; }
+	}
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_PULL_UP, GPIOPin::GPIO_SPD_HIGH, afconfig);
 }
+#endif
 
 #endif // defined (HAL_UART_MODULE_ENABLED)
 
