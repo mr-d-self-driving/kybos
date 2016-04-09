@@ -62,13 +62,8 @@ void UART2IntHandler(void) {
 
 UARTController::UARTController(controller_num_t num) :
 	_num(num),
-	_queue(32),
-	_enabled(false),
-	_baudrate(115200),
-	_wordlength(wordlength_8bit),
-	_parity(parity_none),
-	_stopbits(stopbits_1),
-	_useRxInterrupt(true)
+	_queue(32)
+	//_enabled(false)
 {
 	switch (num) {
 #if defined (UART1) || defined (USART1)
@@ -157,26 +152,18 @@ UARTController::UARTController(controller_num_t num) :
 	}
 }
 
-/*
 void UARTController::handleInterrupt()
 {
-    unsigned long ulStatus;
-    ulStatus = MAP_UARTIntStatus(_base, true);
-
-    MAP_UARTIntClear(_base, ulStatus);
-
-    while(MAP_UARTCharsAvail(_base))
-    {
-    	uint8_t b = MAP_UARTCharGetNonBlocking(_base);
+    for (int i=0; i<_handle.RxXferSize; i++){
+    	uint8_t b = _handle.pRxBuffPtr[i];
     	if (!_queue.sendToBackFromISR(b)) {
     		static int queue_full_err = 0;
     		queue_full_err++;
     	}
     }
-
 }
-*/
 
+/*
 void UARTController::enable()
 {
 	_enabled = true;
@@ -188,14 +175,12 @@ void UARTController::disable()
 	//MAP_UARTDisable(_base);
 	_enabled = false;
 }
+*/
 
-
-void UARTController::setup(GPIOPin rxpin, GPIOPin txpin, uint32_t baudrate, wordlength_t wordLength, parity_t parity, stopbits_t stopbits, bool use_rx_interrupt)
+void UARTController::setup(GPIOPin rxpin, GPIOPin txpin, uint32_t baudrate, wordlength_t wordLength, parity_t parity, stopbits_t stopbits)
 {
 	RecursiveMutexGuard guard(&_mutex);
 
-
-	_useRxInterrupt = use_rx_interrupt;
 
 	_handle.Init.BaudRate = baudrate;
 	_handle.Init.HwFlowCtl = UART_HWCONTROL_NONE;
@@ -221,104 +206,121 @@ void UARTController::setup(GPIOPin rxpin, GPIOPin txpin, uint32_t baudrate, word
 		case controller_1:
 			if ( rxpin.isValid()) { rxpin.mapAsU1RX(); }
 			if ( txpin.isValid()) { txpin.mapAsU1TX(); }
-			if (_useRxInterrupt) {
-				/*
-				UARTIntRegister(UART1_BASE, UART1IntHandler);
-				MAP_IntPrioritySet(INT_UART1, configDEFAULT_SYSCALL_INTERRUPT_PRIORITY);
-				MAP_IntEnable(INT_UART1);
-				*/
-			}
+#if defined (UART1)
+			__HAL_RCC_UART1_CLK_ENABLE();
+		    HAL_NVIC_SetPriority(UART1_IRQn, 5, 0);
+		    HAL_NVIC_EnableIRQ(UART1_IRQn);
+
+#else
+			__HAL_RCC_USART1_CLK_ENABLE();
+		    HAL_NVIC_SetPriority(USART1_IRQn, 5, 0);
+		    HAL_NVIC_EnableIRQ(USART1_IRQn);
+#endif
 			break;
 #endif
 #if defined (UART2) || defined (USART2)
 		case controller_2:
 			if ( rxpin.isValid()) { rxpin.mapAsU2RX(); }
 			if ( txpin.isValid()) { txpin.mapAsU2TX(); }
-			if (_useRxInterrupt) {
-				/*
-				UARTIntRegister(UART2_BASE, UART2IntHandler);
-				MAP_IntPrioritySet(INT_UART2, configDEFAULT_SYSCALL_INTERRUPT_PRIORITY);
-				MAP_IntEnable(INT_UART2);
-				*/
-			}
+#if defined (UART2)
+			__HAL_RCC_UART2_CLK_ENABLE();
+		    HAL_NVIC_SetPriority(UART2_IRQn, 5, 0);
+		    HAL_NVIC_EnableIRQ(UART2_IRQn);
+#else
+			__HAL_RCC_USART2_CLK_ENABLE();
+		    HAL_NVIC_SetPriority(USART2_IRQn, 5, 0);
+		    HAL_NVIC_EnableIRQ(USART2_IRQn);
+#endif
 			break;
 #endif
 #if defined (UART3) || defined (USART3)
 		case controller_3:
 			if ( rxpin.isValid()) { rxpin.mapAsU3RX(); }
 			if ( txpin.isValid()) { txpin.mapAsU3TX(); }
-			if (_useRxInterrupt) {
-				/*
-				UARTIntRegister(UART2_BASE, UART2IntHandler);
-				MAP_IntPrioritySet(INT_UART2, configDEFAULT_SYSCALL_INTERRUPT_PRIORITY);
-				MAP_IntEnable(INT_UART2);
-				*/
-			}
+#if defined (UART3)
+			__HAL_RCC_UART3_CLK_ENABLE();
+		    HAL_NVIC_SetPriority(UART3_IRQn, 5, 0);
+		    HAL_NVIC_EnableIRQ(UART3_IRQn);
+#else
+			__HAL_RCC_USART3_CLK_ENABLE();
+		    HAL_NVIC_SetPriority(USART3_IRQn, 5, 0);
+		    HAL_NVIC_EnableIRQ(USART3_IRQn);
+#endif
 			break;
 #endif
 #if defined (UART4) || defined (USART4)
 		case controller_4:
 			if ( rxpin.isValid()) { rxpin.mapAsU4RX(); }
 			if ( txpin.isValid()) { txpin.mapAsU4TX(); }
-			if (_useRxInterrupt) {
-				/*
-				UARTIntRegister(UART2_BASE, UART2IntHandler);
-				MAP_IntPrioritySet(INT_UART2, configDEFAULT_SYSCALL_INTERRUPT_PRIORITY);
-				MAP_IntEnable(INT_UART2);
-				*/
-			}
+#if defined (UART4)
+			__HAL_RCC_UART4_CLK_ENABLE();
+		    HAL_NVIC_SetPriority(UART4_IRQn, 5, 0);
+		    HAL_NVIC_EnableIRQ(UART4_IRQn);
+#else
+			__HAL_RCC_USART4_CLK_ENABLE();
+		    HAL_NVIC_SetPriority(USART4_IRQn, 5, 0);
+		    HAL_NVIC_EnableIRQ(USART4_IRQn);
+#endif
 			break;
 #endif
 #if defined (UART5) || defined (USART5)
 		case controller_5:
 			if ( rxpin.isValid()) { rxpin.mapAsU5RX(); }
 			if ( txpin.isValid()) { txpin.mapAsU5TX(); }
-			if (_useRxInterrupt) {
-				/*
-				UARTIntRegister(UART2_BASE, UART2IntHandler);
-				MAP_IntPrioritySet(INT_UART2, configDEFAULT_SYSCALL_INTERRUPT_PRIORITY);
-				MAP_IntEnable(INT_UART2);
-				*/
-			}
+#if defined (UART5)
+			__HAL_RCC_UART5_CLK_ENABLE();
+		    HAL_NVIC_SetPriority(UART5_IRQn, 5, 0);
+		    HAL_NVIC_EnableIRQ(UART5_IRQn);
+#else
+			__HAL_RCC_USART5_CLK_ENABLE();
+		    HAL_NVIC_SetPriority(USART5_IRQn, 5, 0);
+		    HAL_NVIC_EnableIRQ(USART5_IRQn);
+#endif
 			break;
 #endif
 #if defined (UART6) || defined (USART6)
 		case controller_6:
 			if ( rxpin.isValid()) { rxpin.mapAsU6RX(); }
 			if ( txpin.isValid()) { txpin.mapAsU6TX(); }
-			if (_useRxInterrupt) {
-				/*
-				UARTIntRegister(UART2_BASE, UART2IntHandler);
-				MAP_IntPrioritySet(INT_UART2, configDEFAULT_SYSCALL_INTERRUPT_PRIORITY);
-				MAP_IntEnable(INT_UART2);
-				*/
-			}
+#if defined (UART6)
+			__HAL_RCC_UART6_CLK_ENABLE();
+		    HAL_NVIC_SetPriority(UART6_IRQn, 5, 0);
+		    HAL_NVIC_EnableIRQ(UART6_IRQn);
+#else
+			__HAL_RCC_USART6_CLK_ENABLE();
+		    HAL_NVIC_SetPriority(USART6_IRQn, 5, 0);
+		    HAL_NVIC_EnableIRQ(USART6_IRQn);
+#endif
 			break;
 #endif
 #if defined (UART7) || defined (USART7)
 		case controller_7:
 			if ( rxpin.isValid()) { rxpin.mapAsU7RX(); }
 			if ( txpin.isValid()) { txpin.mapAsU7TX(); }
-			if (_useRxInterrupt) {
-				/*
-				UARTIntRegister(UART2_BASE, UART2IntHandler);
-				MAP_IntPrioritySet(INT_UART2, configDEFAULT_SYSCALL_INTERRUPT_PRIORITY);
-				MAP_IntEnable(INT_UART2);
-				*/
-			}
+#if defined (UART7)
+			__HAL_RCC_UART7_CLK_ENABLE();
+		    HAL_NVIC_SetPriority(UART7_IRQn, 5, 0);
+		    HAL_NVIC_EnableIRQ(UART7_IRQn);
+#else
+			__HAL_RCC_USART7_CLK_ENABLE();
+		    HAL_NVIC_SetPriority(USART7_IRQn, 5, 0);
+		    HAL_NVIC_EnableIRQ(USART7_IRQn);
+#endif
 			break;
 #endif
 #if defined (UART8) || defined (USART8)
 		case controller_8:
 			if ( rxpin.isValid()) { rxpin.mapAsU8RX(); }
 			if ( txpin.isValid()) { txpin.mapAsU8TX(); }
-			if (_useRxInterrupt) {
-				/*
-				UARTIntRegister(UART2_BASE, UART2IntHandler);
-				MAP_IntPrioritySet(INT_UART2, configDEFAULT_SYSCALL_INTERRUPT_PRIORITY);
-				MAP_IntEnable(INT_UART2);
-				*/
-			}
+#if defined (UART8)
+			__HAL_RCC_UART8_CLK_ENABLE();
+		    HAL_NVIC_SetPriority(UART8_IRQn, 5, 0);
+		    HAL_NVIC_EnableIRQ(UART8_IRQn);
+#else
+			__HAL_RCC_USART8_CLK_ENABLE();
+		    HAL_NVIC_SetPriority(USART8_IRQn, 5, 0);
+		    HAL_NVIC_EnableIRQ(USART8_IRQn);
+#endif
 			break;
 #endif
 		default:
@@ -326,106 +328,52 @@ void UARTController::setup(GPIOPin rxpin, GPIOPin txpin, uint32_t baudrate, word
 			break;
 	}
 
-	//MAP_UARTFIFOEnable(_base);
+	_txCpltSema.take(); // Take once, so reads will block
 
-	if (_useRxInterrupt) {
-		//MAP_UARTIntEnable(_base, UART_INT_RX | UART_INT_RT);
-	}
+	_handle.pRxBuffPtr = _rxBuf;
+	_handle.pTxBuffPtr = _txBuf;
 
-	setLineParameters(baudrate, wordLength, parity, stopbits);
+	HAL_UART_Init(&_handle);
+
 }
 
-void UARTController::setParityMode(UARTController::parity_t parity)
-{
-	//MAP_UARTParityModeSet(_base, parity);
-}
-
-UARTController::parity_t UARTController::getParityMode(void)
-{
-	//return (UARTController::parity_t) MAP_UARTParityModeGet(_base);
-}
-
-void UARTController::setBreakState(bool breakState)
-{
-	//MAP_UARTBreakCtl(_base, breakState);
-}
-
-bool UARTController::isTransmitting()
-{
-	//return (MAP_UARTBusy(_base) == false);
-}
 
 void UARTController::putChar(uint8_t c)
 {
-	/*
-    while(HWREG(_base + UART_O_FR) & UART_FR_TXFF)
-    {
-    	Task::yield();
-    }
-    HWREG(_base + UART_O_DR) = c;
-    */
+	RecursiveMutexGuard guard(&_mutex);
+
+	HAL_UART_Transmit_IT(&_handle, &c, 1);
+	_txCpltSema.take();
 }
 
 uint8_t UARTController::getChar(void)
 {
-	/*
-	if (_useRxInterrupt) {
-		uint8_t result = 0;
-		while (!_queue.receive(&result)) {
-			static int receive_err = 0;
-			receive_err++;
-		}
-		return result;
-	} else {
-	    while(HWREG(_base + UART_O_FR) & UART_FR_RXFE) {
-	    	Task::yield();
-	    }
-	    return(HWREG(_base + UART_O_DR));
+	uint8_t result = 0;
+	while (!_queue.receive(&result)) {
+		static int receive_err = 0;
+		receive_err++;
 	}
-	*/
+	return result;
 }
 
-
-void UARTController::putCharNonblocking(uint8_t c)
-{
-	//MAP_UARTCharPutNonBlocking(_base, c);
-}
 
 int16_t UARTController::getCharNonBlocking()
 {
-	/*
 	uint8_t data;
-	if (_useRxInterrupt) {
-		if (_queue.receive(&data, 0)) {
-			return data;
-		} else {
-			return -1;
-		}
+	if (_queue.receive(&data, 0)) {
+		return data;
 	} else {
-		return MAP_UARTCharGetNonBlocking(_base);
+		return -1;
 	}
-	*/
 }
 
 int16_t UARTController::getCharTimeout(uint32_t timeout) {
-	/*
 	uint8_t data;
-	if (_useRxInterrupt) {
-		if (_queue.receive(&data, timeout)) {
-			return data;
-		} else {
-			return -1;
-		}
+	if (_queue.receive(&data, timeout)) {
+		return data;
 	} else {
-		uint32_t t_max = Task::getTime() + timeout;
-		while (Task::getTime() <= t_max) {
-			int result = MAP_UARTCharGetNonBlocking(_base);
-			if (result!=-1) { return result; }
-			Task::delay_ticks(1);
-		}
-		return MAP_UARTCharGetNonBlocking(_base);
+		return -1;
 	}
-	*/
 }
 
 
@@ -433,7 +381,6 @@ int16_t UARTController::getCharTimeout(uint32_t timeout) {
 
 void UARTController::write(const void * const ptr, int len)
 {
-	/*
 	uint8_t *s = (uint8_t *) ptr;
 	int i = 0;
 
@@ -441,18 +388,15 @@ void UARTController::write(const void * const ptr, int len)
 		putChar(s[i++]);
 		//s++;
 	}
-	*/
 }
 
 void UARTController::write( const void * const string)
 {
-	/*
 	uint8_t *s = (uint8_t *) string;
 	while (s[0]!=0) {
 		putChar(s[0]);
 		s++;
 	}
-	*/
 }
 
 RecursiveMutex *UARTController::getMutex()
@@ -482,40 +426,6 @@ void UARTController::setupLinSlave(uint32_t baudrate, GPIOPin rxpin, GPIOPin txp
 }
 */
 
-
-void UARTController::setLineParameters(uint32_t baudrate, wordlength_t wordLength, parity_t parity, stopbits_t stopbits)
-{
-	/*
-	bool _wasEnabled = _enabled;
-	if (_enabled) {	disable(); }
-	_baudrate = baudrate;
-	_wordlength = wordLength;
-	_parity = parity;
-	_stopbits = stopbits;
-	MAP_UARTConfigSetExpClk(_base, MAP_SysCtlClockGet(), baudrate, ((uint8_t) wordLength | (uint8_t) parity | (uint8_t) stopbits));
-    if (_wasEnabled) { enable(); }
-    */
-}
-
-uint32_t UARTController::getBaudrate()
-{
-	return _baudrate;
-}
-
-UARTController::wordlength_t UARTController::getWordLength()
-{
-	return _wordlength;
-}
-
-UARTController::parity_t UARTController::getParity()
-{
-	return _parity;
-}
-
-UARTController::stopbits_t UARTController::getStopBits()
-{
-	return _stopbits;
-}
 
 void UARTController::printf( const char* format, ... )
 {
@@ -619,6 +529,186 @@ int UARTController::readLine(const void *buf, int bufSize)
 	}
 	data[i] = 0x00;
 	return i;
+}
+
+
+#if defined (UART1)
+void UART1_IRQHandler(void)
+#elif defined (USART1)
+void USART1_IRQHandler(void)
+#endif
+{
+  HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_1]->_handle);
+}
+
+#if defined (UART2)
+void UART2_IRQHandler(void)
+#elif defined (USART2)
+void USART2_IRQHandler(void)
+#endif
+{
+  HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_2]->_handle);
+}
+
+#if defined (UART3)
+void UART3_IRQHandler(void)
+#elif defined (USART3)
+void USART3_IRQHandler(void)
+#endif
+{
+  HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_3]->_handle);
+}
+
+#if defined (UART4)
+void UART4_IRQHandler(void)
+#elif defined (USART4)
+void USART4_IRQHandler(void)
+#endif
+{
+  HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_4]->_handle);
+}
+
+#if defined (UART5)
+void UART5_IRQHandler(void)
+#elif defined (USART5)
+void USART5_IRQHandler(void)
+#endif
+{
+  HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_5]->_handle);
+}
+
+#if defined (UART6)
+void UART6_IRQHandler(void)
+#elif defined (USART6)
+void USART6_IRQHandler(void)
+#endif
+{
+  HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_6]->_handle);
+}
+
+#if defined (UART7)
+void UART7_IRQHandler(void)
+#elif defined (USART7)
+void USART7_IRQHandler(void)
+#endif
+{
+  HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_7]->_handle);
+}
+
+#if defined (UART8)
+void UART8_IRQHandler(void)
+#elif defined (USART8)
+void USART8_IRQHandler(void)
+#endif
+{
+  HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_8]->_handle);
+}
+
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+#if defined (UART1)
+	if (huart->Instance == UART1) { UARTController::_instances[UARTController::controller_1]->_txCpltSema.giveFromISR(); }
+#elif defined (USART1)
+	if (huart->Instance == USART1) { UARTController::_instances[UARTController::controller_1]->_txCpltSema.giveFromISR(); }
+#endif
+
+#if defined (UART2)
+	if (huart->Instance == UART2) { UARTController::_instances[UARTController::controller_2]->_txCpltSema.giveFromISR(); }
+#elif defined (USART2)
+	if (huart->Instance == USART2) { UARTController::_instances[UARTController::controller_2]->_txCpltSema.giveFromISR(); }
+#endif
+
+#if defined (UART3)
+	if (huart->Instance == UART3) { UARTController::_instances[UARTController::controller_3]->_txCpltSema.giveFromISR(); }
+#elif defined (USART3)
+	if (huart->Instance == USART3) { UARTController::_instances[UARTController::controller_3]->_txCpltSema.giveFromISR(); }
+#endif
+
+#if defined (UART4)
+	if (huart->Instance == UART4) { UARTController::_instances[UARTController::controller_4]->_txCpltSema.giveFromISR(); }
+#elif defined (USART4)
+	if (huart->Instance == USART4) { UARTController::_instances[UARTController::controller_4]->_txCpltSema.giveFromISR(); }
+#endif
+
+#if defined (UART5)
+	if (huart->Instance == UART5) { UARTController::_instances[UARTController::controller_5]->_txCpltSema.giveFromISR(); }
+#elif defined (USART5)
+	if (huart->Instance == USART5) { UARTController::_instances[UARTController::controller_5]->_txCpltSema.giveFromISR(); }
+#endif
+
+#if defined (UART6)
+	if (huart->Instance == UART6) { UARTController::_instances[UARTController::controller_6]->_txCpltSema.giveFromISR(); }
+#elif defined (USART6)
+	if (huart->Instance == USART6) { UARTController::_instances[UARTController::controller_6]->_txCpltSema.giveFromISR(); }
+#endif
+
+#if defined (UART7)
+	if (huart->Instance == UART7) { UARTController::_instances[UARTController::controller_7]->_txCpltSema.giveFromISR(); }
+#elif defined (USART7)
+	if (huart->Instance == USART7) { UARTController::_instances[UARTController::controller_7]->_txCpltSema.giveFromISR(); }
+#endif
+
+#if defined (UART8)
+	if (huart->Instance == UART8) { UARTController::_instances[UARTController::controller_8]->_txCpltSema.giveFromISR(); }
+#elif defined (USART8)
+	if (huart->Instance == USART8) { UARTController::_instances[UARTController::controller_8]->_txCpltSema.giveFromISR(); }
+#endif
+
+}
+
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+#if defined (UART1)
+	if (huart->Instance == UART1) { UARTController::_instances[UARTController::controller_1]->handleInterrupt(); }
+#elif defined (USART1)
+	if (huart->Instance == USART1) { UARTController::_instances[UARTController::controller_1]->handleInterrupt(); }
+#endif
+
+#if defined (UART2)
+	if (huart->Instance == UART2) { UARTController::_instances[UARTController::controller_2]->handleInterrupt(); }
+#elif defined (USART2)
+	if (huart->Instance == USART2) { UARTController::_instances[UARTController::controller_2]->handleInterrupt(); }
+#endif
+
+#if defined (UART3)
+	if (huart->Instance == UART3) { UARTController::_instances[UARTController::controller_3]->handleInterrupt(); }
+#elif defined (USART3)
+	if (huart->Instance == USART3) { UARTController::_instances[UARTController::controller_3]->handleInterrupt(); }
+#endif
+
+#if defined (UART4)
+	if (huart->Instance == UART4) { UARTController::_instances[UARTController::controller_4]->handleInterrupt(); }
+#elif defined (USART4)
+	if (huart->Instance == USART4) { UARTController::_instances[UARTController::controller_4]->handleInterrupt(); }
+#endif
+
+#if defined (UART5)
+	if (huart->Instance == UART5) { UARTController::_instances[UARTController::controller_5]->handleInterrupt(); }
+#elif defined (USART5)
+	if (huart->Instance == USART5) { UARTController::_instances[UARTController::controller_5]->handleInterrupt(); }
+#endif
+
+#if defined (UART6)
+	if (huart->Instance == UART6) { UARTController::_instances[UARTController::controller_6]->handleInterrupt(); }
+#elif defined (USART6)
+	if (huart->Instance == USART6) { UARTController::_instances[UARTController::controller_6]->handleInterrupt(); }
+#endif
+
+#if defined (UART7)
+	if (huart->Instance == UART7) { UARTController::_instances[UARTController::controller_7]->handleInterrupt(); }
+#elif defined (USART7)
+	if (huart->Instance == USART7) { UARTController::_instances[UARTController::controller_7]->handleInterrupt(); }
+#endif
+
+#if defined (UART8)
+	if (huart->Instance == UART8) { UARTController::_instances[UARTController::controller_8]->handleInterrupt(); }
+#elif defined (USART8)
+	if (huart->Instance == USART8) { UARTController::_instances[UARTController::controller_8]->handleInterrupt(); }
+#endif
+
+
 }
 
 

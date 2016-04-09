@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include "OS/Queue.h"
 #include "OS/RecursiveMutex.h"
+#include "OS/Semaphore.h"
 #include "GPIO.h"
 #include "kybos.h"
 
@@ -41,9 +42,61 @@ class UARTController
 	//friend void UART1IntHandler(void);
 	//friend void UART2IntHandler(void);
 
+	friend void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
+	friend void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart);
+
+	#if defined (UART1)
+	friend void UART1_IRQHandler(void);
+	#elif defined (USART1)
+	friend void USART1_IRQHandler(void);
+	#endif
+
+	#if defined (UART2)
+	friend void UART2_IRQHandler(void);
+	#elif defined (USART2)
+	friend void USART2_IRQHandler(void);
+	#endif
+
+	#if defined (UART3)
+	friend void UART3_IRQHandler(void);
+	#elif defined (USART3)
+	friend void USART3_IRQHandler(void);
+	#endif
+
+	#if defined (UART4)
+	friend void UART4_IRQHandler(void);
+	#elif defined (USART4)
+	friend void USART4_IRQHandler(void);
+	#endif
+
+	#if defined (UART5)
+	friend void UART5_IRQHandler(void);
+	#elif defined (USART5)
+	friend void USART5_IRQHandler(void);
+	#endif
+
+	#if defined (UART6)
+	friend void UART6_IRQHandler(void);
+	#elif defined (USART6)
+	friend void USART6_IRQHandler(void);
+	#endif
+
+	#if defined (UART7)
+	friend void UART7_IRQHandler(void);
+	#elif defined (USART7)
+	friend void USART7_IRQHandler(void);
+	#endif
+
+	#if defined (UART8)
+	friend void UART8_IRQHandler(void);
+	#elif defined (USART8)
+	friend void USART8_IRQHandler(void);
+	#endif
+
+
 	public:
 
-		//void handleInterrupt();
+		void handleInterrupt();
 
 		typedef enum {
 #if defined (UART1) || defined (USART1)
@@ -109,85 +162,66 @@ class UARTController
 
 	private:
 		controller_num_t _num;
-		//uint32_t _periph;
-		//uint32_t _base;
 
 		Queue<uint8_t> _queue;
 		RecursiveMutex _mutex;
+		Semaphore _txCpltSema;
 
 		static UARTController *_instances[num_uart_controllers];
 		UARTController(controller_num_t num);
-		//UARTController(uint8_t portNumber, uint32_t periph, uint32_t base);
 
-		bool _enabled;
-		uint32_t _baudrate;
-		wordlength_t _wordlength;
-		parity_t _parity;
-		stopbits_t _stopbits;
-		bool _useRxInterrupt;
+		//bool _enabled;
 
 		UART_HandleTypeDef _handle;
+		uint8_t _rxBuf[16];
+		uint8_t _txBuf[16];
 
 	public:
 
 		static UARTController *get(controller_num_t num);
 
 		RecursiveMutex *getMutex();
-		//void enablePeripheral();
-		void enable();
-		void disable();
+		//void enable();
+		//void disable();
 
-		void setup(GPIOPin rxpin=GPIOPin::invalid, GPIOPin txpin=GPIOPin::invalid, uint32_t baudrate=115200, wordlength_t wordLength=wordlength_8bit, parity_t parity=parity_none, stopbits_t stopbits=stopbits_1, bool use_rx_interrupt=true);
+		void setup(GPIOPin rxpin=GPIOPin::invalid, GPIOPin txpin=GPIOPin::invalid, uint32_t baudrate=115200, wordlength_t wordLength=wordlength_8bit, parity_t parity=parity_none, stopbits_t stopbits=stopbits_1);
 
 		//void setupLinMaster(uint32_t baudrate, GPIOPin rxpin, GPIOPin txpin);
 		//void setupLinSlave(uint32_t baudrate, GPIOPin rxpin, GPIOPin txpin);
-		void setLineParameters(uint32_t baudrate, wordlength_t wordLength, parity_t parity, stopbits_t stopbits);
-		uint32_t getBaudrate();
-		wordlength_t getWordLength();
-		parity_t getParity();
-		stopbits_t getStopBits();
+
+		//void setLineParameters(uint32_t baudrate, wordlength_t wordLength, parity_t parity, stopbits_t stopbits);
+		//uint32_t getBaudrate();
+		//wordlength_t getWordLength();
+		//parity_t getParity();
+		//stopbits_t getStopBits();
 
 
-		void setParityMode(parity_t parity);
-		parity_t getParityMode(void);
+		//void setParityMode(parity_t parity);
+		//parity_t getParityMode(void);
 
-		void setBreakState(bool breakState);
-		bool isTransmitting();
+		//void setBreakState(bool breakState);
+		//bool isTransmitting();
 
 		void putChar(uint8_t c);
 		uint8_t getChar();
 
-		//void enableFIFO();
-		//void disableFIFO();
-		//void setFIFOTxLevel(fifo_tx_level_t level);
-		//void setFIFORxLevel(fifo_rx_level_t level);
-		//fifo_tx_level_t getFIFOTxLevel();
-		//fifo_rx_level_t getFIFORxLevel();
-		//bool isFIFOCharAvail();
-		//bool isFIFOSpaceAvail();
 		void putCharNonblocking(uint8_t c);
 		int16_t getCharNonBlocking();
 		int16_t getCharTimeout(uint32_t timeout);
 
 		//void enableSIR(bool lowPower); // disable() enableSIR(); enable()
 		//void disableSIR();
-
-
-
 		//uint32_t getRxError();
 		//void clearRxError();
 
 		//void enableSmartCard();
 		//void disableSmartCard();
 
-		// TODO: UARTClockSource
 		// todo: intEnable, intDisable, intRegister, intUnregister, intStatus, intClear, txIntMode
 		// todo: dmaenable, DMAdisable
 
 		// todo: ModemControl
 		// TODO: Hardware Flow Control
-
-		// TODO: 9Bit Mode
 
 		// TODO: loopback
 
