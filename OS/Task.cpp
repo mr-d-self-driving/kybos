@@ -101,15 +101,10 @@ void Task::yield()
 	taskYIELD();
 }
 
-/*
 void Task::yieldFromISR()
 {
-	//vPortYieldFromISR();
-	//vPortYield(); //FIXME!
-	osThreadYield(); // FIXME!
-
+	portYIELD_FROM_ISR(1)
 }
-*/
 
 void Task::delay_ms(uint32_t delay) {
 	vTaskDelay(delay / portTICK_PERIOD_MS);

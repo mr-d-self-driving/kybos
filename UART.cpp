@@ -154,6 +154,7 @@ UARTController::UARTController(controller_num_t num) :
 
 void UARTController::handleInterrupt()
 {
+	_handle.pRxBuffPtr -= _handle.RxXferSize; // goto start of RX buffer
     for (int i=0; i<_handle.RxXferSize; i++){
     	uint8_t b = _handle.pRxBuffPtr[i];
     	if (!_queue.sendToBackFromISR(b)) {
@@ -334,6 +335,9 @@ void UARTController::setup(GPIOPin rxpin, GPIOPin txpin, uint32_t baudrate, word
 	_handle.pTxBuffPtr = _txBuf;
 
 	HAL_UART_Init(&_handle);
+
+	//__HAL_UART_ENABLE_IT(&_handle, UART_IT_RXNE);
+	HAL_UART_Receive_IT(&_handle, _rxBuf, 1);
 
 }
 
@@ -525,12 +529,15 @@ int UARTController::readLine(const void *buf, int bufSize)
 	uint8_t *data = (uint8_t *) buf;
 	for (i=0; i<bufSize-1; i++) {
 		data[i] = getChar();
-		if ( (data[i]==10) || (data[i]==13)) break;
+		if ( (i > 0) && (data[i-1]==13) && (data[i]==10) ) {
+			break;
+		}
 	}
-	data[i] = 0x00;
+	data[i+1] = 0x00;
 	return i;
 }
 
+extern "C" {
 
 #if defined (UART1)
 void UART1_IRQHandler(void)
@@ -539,6 +546,7 @@ void USART1_IRQHandler(void)
 #endif
 {
   HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_1]->_handle);
+  HAL_UART_Receive_IT(&(UARTController::_instances[UARTController::controller_1]->_handle), UARTController::_instances[UARTController::controller_1]->_rxBuf, 1);
 }
 
 #if defined (UART2)
@@ -548,6 +556,7 @@ void USART2_IRQHandler(void)
 #endif
 {
   HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_2]->_handle);
+  HAL_UART_Receive_IT(&(UARTController::_instances[UARTController::controller_2]->_handle), UARTController::_instances[UARTController::controller_2]->_rxBuf, 1);
 }
 
 #if defined (UART3)
@@ -557,6 +566,7 @@ void USART3_IRQHandler(void)
 #endif
 {
   HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_3]->_handle);
+  HAL_UART_Receive_IT(&(UARTController::_instances[UARTController::controller_3]->_handle), UARTController::_instances[UARTController::controller_3]->_rxBuf, 1);
 }
 
 #if defined (UART4)
@@ -566,6 +576,7 @@ void USART4_IRQHandler(void)
 #endif
 {
   HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_4]->_handle);
+  HAL_UART_Receive_IT(&(UARTController::_instances[UARTController::controller_4]->_handle), UARTController::_instances[UARTController::controller_4]->_rxBuf, 1);
 }
 
 #if defined (UART5)
@@ -575,6 +586,7 @@ void USART5_IRQHandler(void)
 #endif
 {
   HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_5]->_handle);
+  HAL_UART_Receive_IT(&(UARTController::_instances[UARTController::controller_5]->_handle), UARTController::_instances[UARTController::controller_5]->_rxBuf, 1);
 }
 
 #if defined (UART6)
@@ -584,6 +596,7 @@ void USART6_IRQHandler(void)
 #endif
 {
   HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_6]->_handle);
+  HAL_UART_Receive_IT(&(UARTController::_instances[UARTController::controller_6]->_handle), UARTController::_instances[UARTController::controller_6]->_rxBuf, 1);
 }
 
 #if defined (UART7)
@@ -593,6 +606,7 @@ void USART7_IRQHandler(void)
 #endif
 {
   HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_7]->_handle);
+  HAL_UART_Receive_IT(&(UARTController::_instances[UARTController::controller_7]->_handle), UARTController::_instances[UARTController::controller_7]->_rxBuf, 1);
 }
 
 #if defined (UART8)
@@ -602,6 +616,7 @@ void USART8_IRQHandler(void)
 #endif
 {
   HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_8]->_handle);
+  HAL_UART_Receive_IT(&(UARTController::_instances[UARTController::controller_8]->_handle), UARTController::_instances[UARTController::controller_8]->_rxBuf, 1);
 }
 
 
@@ -708,8 +723,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	if (huart->Instance == USART8) { UARTController::_instances[UARTController::controller_8]->handleInterrupt(); }
 #endif
 
-
 }
+
+
+} // extern "C"
 
 
 #endif // defined (HAL_UART_MODULE_ENABLED)

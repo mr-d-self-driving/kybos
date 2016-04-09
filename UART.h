@@ -35,12 +35,63 @@
 
 #if defined (HAL_UART_MODULE_ENABLED)
 
+extern "C" {
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart);
+
+#if defined (UART1)
+void UART1_IRQHandler(void);
+#elif defined (USART1)
+void USART1_IRQHandler(void);
+#endif
+
+#if defined (UART2)
+void UART2_IRQHandler(void);
+#elif defined (USART2)
+void USART2_IRQHandler(void);
+#endif
+
+#if defined (UART3)
+void UART3_IRQHandler(void);
+#elif defined (USART3)
+void USART3_IRQHandler(void);
+#endif
+
+#if defined (UART4)
+void UART4_IRQHandler(void);
+#elif defined (USART4)
+void USART4_IRQHandler(void);
+#endif
+
+#if defined (UART5)
+void UART5_IRQHandler(void);
+#elif defined (USART5)
+void USART5_IRQHandler(void);
+#endif
+
+#if defined (UART6)
+void UART6_IRQHandler(void);
+#elif defined (USART6)
+void USART6_IRQHandler(void);
+#endif
+
+#if defined (UART7)
+void UART7_IRQHandler(void);
+#elif defined (USART7)
+void USART7_IRQHandler(void);
+#endif
+
+#if defined (UART8)
+void UART8_IRQHandler(void);
+#elif defined (USART8)
+void USART8_IRQHandler(void);
+#endif
+
+}  // extern "C"
+
 
 class UARTController
 {
-	//friend void UART0IntHandler(void);
-	//friend void UART1IntHandler(void);
-	//friend void UART2IntHandler(void);
 
 	friend void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 	friend void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart);
@@ -92,7 +143,6 @@ class UARTController
 	#elif defined (USART8)
 	friend void USART8_IRQHandler(void);
 	#endif
-
 
 	public:
 
