@@ -19,16 +19,32 @@ class SPIController {
 public:
 
 	typedef enum {
+#if defined (SPI1)
 		SPICONTROLLER_1,
+#endif
+#if defined (SPI2)
 		SPICONTROLLER_2,
+#endif
+#if defined (SPI3)
+		SPICONTROLLER_3,
+#endif
+#if defined (SPI4)
+		SPICONTROLLER_4,
+#endif
+#if defined (SPI5)
+		SPICONTROLLER_5,
+#endif
+#if defined (SPI6)
+		SPICONTROLLER_6,
+#endif
 		SPICONTROLLER_COUNT
 	} spicontroller_t;
 
 	typedef enum {
-		motorola_0 = 0x00000000, // polarity 0, phase 0
-		motorola_1 = 0x00000002, // polarity 0, phase 1
-		motorola_2 = 0x00000001, // polarity 1, phase 0
-		motorola_3 = 0x00000003, // polarity 1, phase 1
+		motorola_0, // polarity 0, phase 0
+		motorola_1, // polarity 0, phase 1
+		motorola_2, // polarity 1, phase 0
+		motorola_3, // polarity 1, phase 1
 	} protocol_t;
 
 	typedef enum {
@@ -37,28 +53,44 @@ public:
 	} mode_t;
 
 	typedef enum {
-		data_width_4bit = SPI_DATASIZE_4BIT,
-		data_width_5bit = SPI_DATASIZE_5BIT,
-		data_width_6bit = SPI_DATASIZE_6BIT,
-		data_width_7bit = SPI_DATASIZE_7BIT,
 		data_width_8bit = SPI_DATASIZE_8BIT,
-		data_width_9bit = SPI_DATASIZE_9BIT,
-		data_width_10bit = SPI_DATASIZE_10BIT,
-		data_width_11bit = SPI_DATASIZE_11BIT,
-		data_width_12bit = SPI_DATASIZE_12BIT,
-		data_width_13bit = SPI_DATASIZE_13BIT,
-		data_width_14bit = SPI_DATASIZE_14BIT,
-		data_width_15bit = SPI_DATASIZE_15BIT,
 		data_width_16bit = SPI_DATASIZE_16BIT
 	} data_width_t;
+
+	typedef enum {
+#if defined (SPI_BAUDRATEPRESCALER_2)
+		baudrate_ps2=SPI_BAUDRATEPRESCALER_2,
+#endif
+#if defined (SPI_BAUDRATEPRESCALER_4)
+		baudrate_ps4=SPI_BAUDRATEPRESCALER_4,
+#endif
+#if defined (SPI_BAUDRATEPRESCALER_8)
+		baudrate_ps8=SPI_BAUDRATEPRESCALER_8,
+#endif
+#if defined (SPI_BAUDRATEPRESCALER_16)
+		baudrate_ps16=SPI_BAUDRATEPRESCALER_16,
+#endif
+#if defined (SPI_BAUDRATEPRESCALER_32)
+		baudrate_ps32=SPI_BAUDRATEPRESCALER_32,
+#endif
+#if defined (SPI_BAUDRATEPRESCALER_64)
+		baudrate_ps64=SPI_BAUDRATEPRESCALER_64,
+#endif
+#if defined (SPI_BAUDRATEPRESCALER_128)
+		baudrate_ps128=SPI_BAUDRATEPRESCALER_128,
+#endif
+#if defined (SPI_BAUDRATEPRESCALER_256)
+		baudrate_ps256=SPI_BAUDRATEPRESCALER_256,
+#endif
+	}baudrate_ps_t;
 
 private:
 	spicontroller_t _controller;
 
 	GPIOPin _clk;
-	GPIOPin _fss;
-	GPIOPin _rx;
-	GPIOPin _tx;
+	GPIOPin _nss;
+	GPIOPin _mosi;
+	GPIOPin _miso;
 
 	mode_t _mode;
 
@@ -72,8 +104,7 @@ private:
 
 public:
 	void setup(GPIOPin clk=GPIOPin(), GPIOPin rx=GPIOPin(), GPIOPin tx=GPIOPin(), GPIOPin fss=GPIOPin());
-	//void setup(GPIOPin clk, GPIOPin::gpio_afconfig_t afconfig_clk, GPIOPin rx, GPIOPin::gpio_afconfig_t afconfig_rx, GPIOPin tx, GPIOPin::gpio_afconfig_t afconfig_tx, GPIOPin fss, GPIOPin::gpio_afconfig_t afconfig_fss);
-	void configure(protocol_t protocol, mode_t mode, uint32_t bitrate, data_width_t data_width);
+	void configure(protocol_t protocol, mode_t mode, baudrate_ps_t baudrate_prescaler, data_width_t data_width);
 	int writeAndRead(const void *writeBuf, void *readBuf, int len);
 
 	static SPIController* get(spicontroller_t num);

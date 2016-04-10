@@ -156,10 +156,32 @@ public:
 	void mapAsSPI1MISO();
 	void mapAsSPI1MOSI();
 	void mapAsSPI1NSS();
+	void mapAsSPI2CLK();
+	void mapAsSPI2MISO();
+	void mapAsSPI2MOSI();
+	void mapAsSPI2NSS();
+	void mapAsSPI3CLK();
+	void mapAsSPI3MISO();
+	void mapAsSPI3MOSI();
+	void mapAsSPI3NSS();
+	void mapAsSPI4CLK();
+	void mapAsSPI4MISO();
+	void mapAsSPI4MOSI();
+	void mapAsSPI4NSS();
+	void mapAsSPI5CLK();
+	void mapAsSPI5MISO();
+	void mapAsSPI5MOSI();
+	void mapAsSPI5NSS();
+	void mapAsSPI6CLK();
+	void mapAsSPI6MISO();
+	void mapAsSPI6MOSI();
+	void mapAsSPI6NSS();
+
 	void mapAsCAN1RX();
 	void mapAsCAN1TX();
 	void mapAsCAN2RX();
 	void mapAsCAN2TX();
+
 	void mapAsI2C1SDA();
 	void mapAsI2C2SDA();
 	void mapAsI2C3SDA();

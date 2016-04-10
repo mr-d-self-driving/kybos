@@ -486,6 +486,151 @@ void GPIOPin::mapAsI2C3SCL()
 #endif  // HAL_I2C_MODULE_ENABLED
 
 
+#ifdef HAL_SPI_MODULE_ENABLED
+void GPIOPin::mapAsSPI1CLK()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI1MISO()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI1MOSI()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI1NSS()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI2CLK()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI2MISO()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI2MOSI()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI2NSS()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+void GPIOPin::mapAsSPI3CLK()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI3MISO()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI3MOSI()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI3NSS()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+void GPIOPin::mapAsSPI4CLK()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI4MISO()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI4MOSI()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI4NSS()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+void GPIOPin::mapAsSPI5CLK()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI5MISO()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI5MOSI()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI5NSS()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+void GPIOPin::mapAsSPI6CLK()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI6MISO()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI6MOSI()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+void GPIOPin::mapAsSPI6NSS()
+{
+	GPIOPin::gpio_afconfig_t afconfig;
+	this->configure(GPIOPin::GPIO_AF_PP, GPIOPin::GPIO_NO_PULL, GPIOPin::GPIO_SPD_HIGH, afconfig);
+}
+
+#endif // HAL_SPI_MODULE_ENABLED
+
+
+
 #endif // STM32F429xx
 
 #ifdef STM32F072
