@@ -53,9 +53,47 @@ public:
 	} mode_t;
 
 	typedef enum {
+#if defined (SPI_DATASIZE_4BIT)
+		data_width_4bit = SPI_DATASIZE_4BIT,
+#endif
+#if defined (SPI_DATASIZE_5BIT)
+		data_width_5bit = SPI_DATASIZE_5BIT,
+#endif
+#if defined (SPI_DATASIZE_6BIT)
+		data_width_6bit = SPI_DATASIZE_6BIT,
+#endif
+#if defined (SPI_DATASIZE_7BIT)
+		data_width_7bit = SPI_DATASIZE_7BIT,
+#endif
+#if defined (SPI_DATASIZE_8BIT)
 		data_width_8bit = SPI_DATASIZE_8BIT,
-		data_width_16bit = SPI_DATASIZE_16BIT
+#endif
+#if defined (SPI_DATASIZE_9BIT)
+		data_width_9bit = SPI_DATASIZE_9BIT,
+#endif
+#if defined (SPI_DATASIZE_10BIT)
+		data_width_10bit = SPI_DATASIZE_10BIT,
+#endif
+#if defined (SPI_DATASIZE_11BIT)
+		data_width_11bit = SPI_DATASIZE_11BIT,
+#endif
+#if defined (SPI_DATASIZE_12BIT)
+		data_width_12bit = SPI_DATASIZE_12BIT,
+#endif
+#if defined (SPI_DATASIZE_13BIT)
+		data_width_13bit = SPI_DATASIZE_13BIT,
+#endif
+#if defined (SPI_DATASIZE_14BIT)
+		data_width_14bit = SPI_DATASIZE_14BIT,
+#endif
+#if defined (SPI_DATASIZE_15BIT)
+		data_width_15bit = SPI_DATASIZE_15BIT,
+#endif
+#if defined (SPI_DATASIZE_16BIT)
+		data_width_16bit = SPI_DATASIZE_16BIT,
+#endif
 	} data_width_t;
+
 
 	typedef enum {
 #if defined (SPI_BAUDRATEPRESCALER_2)
