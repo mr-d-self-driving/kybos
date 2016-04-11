@@ -9,7 +9,6 @@
 #define KYBOS_I2CCONTROLLER_H_
 
 #include <stdint.h>
-#include <cmsis_device.h>
 #include "OS/RecursiveMutex.h"
 #include "GPIO.h"
 #include "kybos.h"

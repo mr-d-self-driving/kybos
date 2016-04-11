@@ -103,7 +103,7 @@ void Task::yield()
 
 void Task::yieldFromISR()
 {
-	portYIELD_FROM_ISR(1)
+	portYIELD_FROM_ISR(1);
 }
 
 void Task::delay_ms(uint32_t delay) {

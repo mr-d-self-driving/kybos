@@ -12,8 +12,6 @@
 
 #ifdef HAL_SPI_MODULE_ENABLED
 
-
-#include <cmsis_device.h>
 #include "GPIO.h"
 #include "SPIController.h"
 

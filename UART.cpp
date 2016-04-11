@@ -31,6 +31,7 @@
 #include "OS/Mutex.h"
 #include "OS/Task.h"
 
+#include "kybos.h"
 
 #if defined (HAL_UART_MODULE_ENABLED)
 
@@ -45,20 +46,6 @@ UARTController *UARTController::get(controller_num_t num)
 	}
 	return _instances[num];
 }
-
-/*
-void UART0IntHandler(void) {
-	UARTController::_instances[UARTController::controller_0]->handleInterrupt();
-}
-
-void UART1IntHandler(void) {
-	UARTController::_instances[UARTController::controller_1]->handleInterrupt();
-}
-
-void UART2IntHandler(void) {
-	UARTController::_instances[UARTController::controller_2]->handleInterrupt();
-}
-*/
 
 UARTController::UARTController(controller_num_t num) :
 	_num(num),
@@ -234,6 +221,22 @@ void UARTController::setup(GPIOPin rxpin, GPIOPin txpin, uint32_t baudrate, word
 #endif
 			break;
 #endif
+#if defined (STM32F072)
+		case controller_3:
+			if ( rxpin.isValid()) { rxpin.mapAsU3RX(); }
+			if ( txpin.isValid()) { txpin.mapAsU3TX(); }
+			__HAL_RCC_USART3_CLK_ENABLE();
+		    HAL_NVIC_SetPriority(USART3_4_IRQn, 5, 0);
+		    HAL_NVIC_EnableIRQ(USART3_4_IRQn);
+		    break;
+		case controller_4:
+			if ( rxpin.isValid()) { rxpin.mapAsU4RX(); }
+			if ( txpin.isValid()) { txpin.mapAsU4TX(); }
+			__HAL_RCC_USART4_CLK_ENABLE();
+		    HAL_NVIC_SetPriority(USART3_4_IRQn, 5, 0);
+		    HAL_NVIC_EnableIRQ(USART3_4_IRQn);
+		    break;
+#else // NOT defined (STM32F072)
 #if defined (UART3) || defined (USART3)
 		case controller_3:
 			if ( rxpin.isValid()) { rxpin.mapAsU3RX(); }
@@ -264,6 +267,8 @@ void UARTController::setup(GPIOPin rxpin, GPIOPin txpin, uint32_t baudrate, word
 #endif
 			break;
 #endif
+#endif // defined (STM32F072)
+
 #if defined (UART5) || defined (USART5)
 		case controller_5:
 			if ( rxpin.isValid()) { rxpin.mapAsU5RX(); }
@@ -539,6 +544,7 @@ int UARTController::readLine(const void *buf, int bufSize)
 
 extern "C" {
 
+#if defined (UART1) || defined (USART1)
 #if defined (UART1)
 void UART1_IRQHandler(void)
 #elif defined (USART1)
@@ -548,7 +554,9 @@ void USART1_IRQHandler(void)
   HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_1]->_handle);
   HAL_UART_Receive_IT(&(UARTController::_instances[UARTController::controller_1]->_handle), UARTController::_instances[UARTController::controller_1]->_rxBuf, 1);
 }
+#endif
 
+#if defined (UART2) || defined (USART2)
 #if defined (UART2)
 void UART2_IRQHandler(void)
 #elif defined (USART2)
@@ -558,7 +566,19 @@ void USART2_IRQHandler(void)
   HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_2]->_handle);
   HAL_UART_Receive_IT(&(UARTController::_instances[UARTController::controller_2]->_handle), UARTController::_instances[UARTController::controller_2]->_rxBuf, 1);
 }
+#endif
 
+#if defined (STM32F072)
+void USART3_4_IRQHandler(void)
+{
+	//For now, just try on both UARTs. I'm sure there must be a better way :)
+	HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_3]->_handle);
+	HAL_UART_Receive_IT(&(UARTController::_instances[UARTController::controller_3]->_handle), UARTController::_instances[UARTController::controller_3]->_rxBuf, 1);
+	HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_4]->_handle);
+	HAL_UART_Receive_IT(&(UARTController::_instances[UARTController::controller_4]->_handle), UARTController::_instances[UARTController::controller_3]->_rxBuf, 1);
+}
+#else // NOT defined (STM32F072)
+#if defined (UART3) || defined (USART3)
 #if defined (UART3)
 void UART3_IRQHandler(void)
 #elif defined (USART3)
@@ -568,7 +588,9 @@ void USART3_IRQHandler(void)
   HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_3]->_handle);
   HAL_UART_Receive_IT(&(UARTController::_instances[UARTController::controller_3]->_handle), UARTController::_instances[UARTController::controller_3]->_rxBuf, 1);
 }
+#endif
 
+#if defined (UART4) || defined (USART4)
 #if defined (UART4)
 void UART4_IRQHandler(void)
 #elif defined (USART4)
@@ -578,7 +600,10 @@ void USART4_IRQHandler(void)
   HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_4]->_handle);
   HAL_UART_Receive_IT(&(UARTController::_instances[UARTController::controller_4]->_handle), UARTController::_instances[UARTController::controller_4]->_rxBuf, 1);
 }
+#endif
+#endif // defined (STM32F072)
 
+#if defined (UART5) || defined (USART5)
 #if defined (UART5)
 void UART5_IRQHandler(void)
 #elif defined (USART5)
@@ -588,7 +613,9 @@ void USART5_IRQHandler(void)
   HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_5]->_handle);
   HAL_UART_Receive_IT(&(UARTController::_instances[UARTController::controller_5]->_handle), UARTController::_instances[UARTController::controller_5]->_rxBuf, 1);
 }
+#endif
 
+#if defined (UART6) || defined (USART6)
 #if defined (UART6)
 void UART6_IRQHandler(void)
 #elif defined (USART6)
@@ -598,7 +625,10 @@ void USART6_IRQHandler(void)
   HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_6]->_handle);
   HAL_UART_Receive_IT(&(UARTController::_instances[UARTController::controller_6]->_handle), UARTController::_instances[UARTController::controller_6]->_rxBuf, 1);
 }
+#endif
 
+
+#if defined (UART7) || defined (USART7)
 #if defined (UART7)
 void UART7_IRQHandler(void)
 #elif defined (USART7)
@@ -608,7 +638,9 @@ void USART7_IRQHandler(void)
   HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_7]->_handle);
   HAL_UART_Receive_IT(&(UARTController::_instances[UARTController::controller_7]->_handle), UARTController::_instances[UARTController::controller_7]->_rxBuf, 1);
 }
+#endif
 
+#if defined (UART8) || defined (USART8)
 #if defined (UART8)
 void UART8_IRQHandler(void)
 #elif defined (USART8)
@@ -618,7 +650,7 @@ void USART8_IRQHandler(void)
   HAL_UART_IRQHandler(&UARTController::_instances[UARTController::controller_8]->_handle);
   HAL_UART_Receive_IT(&(UARTController::_instances[UARTController::controller_8]->_handle), UARTController::_instances[UARTController::controller_8]->_rxBuf, 1);
 }
-
+#endif
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {

@@ -51,6 +51,9 @@ void UART2_IRQHandler(void);
 void USART2_IRQHandler(void);
 #endif
 
+# if defined (STM32F072)
+void USART3_4_IRQHandler(void);
+#else // NOT defined (STM32F072)
 #if defined (UART3)
 void UART3_IRQHandler(void);
 #elif defined (USART3)
@@ -62,6 +65,7 @@ void UART4_IRQHandler(void);
 #elif defined (USART4)
 void USART4_IRQHandler(void);
 #endif
+#endif // defined (STM32F072)
 
 #if defined (UART5)
 void UART5_IRQHandler(void);
@@ -108,6 +112,9 @@ class UARTController
 	friend void USART2_IRQHandler(void);
 	#endif
 
+#if defined (STM32F072)
+	friend void USART3_4_IRQHandler(void);
+#else // NOT defined (STM32F072)
 	#if defined (UART3)
 	friend void UART3_IRQHandler(void);
 	#elif defined (USART3)
@@ -119,6 +126,7 @@ class UARTController
 	#elif defined (USART4)
 	friend void USART4_IRQHandler(void);
 	#endif
+#endif // defined (STM32F072)
 
 	#if defined (UART5)
 	friend void UART5_IRQHandler(void);
@@ -205,8 +213,15 @@ class UARTController
 		} parity_t;
 
 		typedef enum {
+#if defined (UART_STOPBITS_1)
 			stopbits_1 = UART_STOPBITS_1,
-			stopbits_2 = UART_STOPBITS_2
+#endif
+#if defined (UART_STOPBITS_2)
+			stopbits_2 = UART_STOPBITS_2,
+#endif
+#if defined (UART_STOPBITS_1_5)
+			stopbits_1_5 = UART_STOPBITS_1_5,
+#endif
 		} stopbits_t;
 
 
