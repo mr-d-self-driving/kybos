@@ -35,7 +35,7 @@ CANController::CANController(CANBus::channel_t channel) :
 	_observerMutex(),
 	_lastMessageReceivedTimestamp(0),
 	_silent(false),
-	_timeToWaitForFreeMob(100),
+	_timeToWaitForFreeMob(10),
 	_bitrate(CANBus::bitrate_500kBit),
 	_pool(20)
 {
@@ -178,10 +178,27 @@ void CANController::setup(CANBus::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpi
 
 	CAN_FilterConfTypeDef CAN_FilterInitStructure;
 
-	CAN_FilterInitStructure.FilterNumber=1;
+	switch(_channel) {
+#if defined CAN2
+	case CANBus::channel_1:
+		CAN_FilterInitStructure.FilterNumber=1;
+		break;
+	case CANBus::channel_2:
+		CAN_FilterInitStructure.FilterNumber=15;
+		break;
+#elif defined CAN
+	case CANBus::channel_1:
+		CAN_FilterInitStructure.FilterNumber=1;
+		break;
+#endif
+	default:
+		while(1) {;}
+	}
+
 	CAN_FilterInitStructure.FilterMode=CAN_FILTERMODE_IDMASK;
 
-	CAN_FilterInitStructure.FilterScale=CAN_FILTERSCALE_16BIT;
+	//CAN_FilterInitStructure.FilterScale=CAN_FILTERSCALE_16BIT;
+	CAN_FilterInitStructure.FilterScale=CAN_FILTERSCALE_32BIT;
 	CAN_FilterInitStructure.FilterIdHigh=0x0000;
 	CAN_FilterInitStructure.FilterIdLow=0x0000;
 	CAN_FilterInitStructure.FilterMaskIdHigh=0x0000;
@@ -191,7 +208,6 @@ void CANController::setup(CANBus::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpi
 	CAN_FilterInitStructure.FilterActivation=ENABLE;
 	CAN_FilterInitStructure.BankNumber = 1;
 	HAL_CAN_ConfigFilter(&_handle, &CAN_FilterInitStructure);
-
 
 	CAN_FilterInitStructure.FilterFIFOAssignment=CAN_FIFO1;  //setup for FIFO1, also
 	HAL_CAN_ConfigFilter(&_handle, &CAN_FilterInitStructure);
@@ -282,6 +298,9 @@ bool CANController::sendMessage(CANMessage *msg)
 
 	_handle.pTxMsg->DLC = msg->dlc;
 	_handle.pTxMsg->IDE = msg->isExtendedId()?CAN_ID_EXT:CAN_ID_STD;
+	if (msg->id > 0x7ff) {
+		_handle.pTxMsg->IDE = CAN_ID_EXT;
+	}
 	_handle.pTxMsg->RTR = msg->isRemoteFrame()?CAN_RTR_REMOTE:CAN_RTR_DATA;
 	memcpy(_handle.pTxMsg->Data, msg->data, msg->dlc);
 	if (_handle.pTxMsg->IDE) {
@@ -291,8 +310,8 @@ bool CANController::sendMessage(CANMessage *msg)
 		_handle.pTxMsg->StdId = msg->id;
 	}
 
-	//HAL_StatusTypeDef status = HAL_CAN_Transmit(&_handle, _timeToWaitForFreeMob);
-	HAL_StatusTypeDef status = HAL_CAN_Transmit_IT(&_handle);
+	HAL_StatusTypeDef status = HAL_CAN_Transmit(&_handle, _timeToWaitForFreeMob);
+	//HAL_StatusTypeDef status = HAL_CAN_Transmit_IT(&_handle);
 	return (status == HAL_OK);
 }
 
