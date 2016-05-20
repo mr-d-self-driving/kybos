@@ -70,7 +70,12 @@ void SPIController::configure(protocol_t protocol, mode_t mode, baudrate_ps_t ba
 	_handle.Init.CRCPolynomial = 7;
 	//_handle.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
 	_handle.Init.Direction = SPI_DIRECTION_2LINES;
-	_handle.Init.NSS = SPI_NSS_SOFT;
+	if ( _nss.isValid() ) {
+		_handle.Init.NSS = (mode==master)?SPI_NSS_HARD_OUTPUT:SPI_NSS_HARD_INPUT;
+	}
+	else {
+		_handle.Init.NSS = SPI_NSS_SOFT;
+	}
 	_handle.Init.BaudRatePrescaler = baudrate_prescaler;
 	_handle.Init.TIMode = SPI_TIMODE_DISABLED;
 
