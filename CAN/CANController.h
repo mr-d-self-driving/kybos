@@ -38,6 +38,8 @@
 #include "CANMessagePool.h"
 
 
+#define NUM_CAN_MOBS (16)
+
 class CANObserver;
 
 /**
@@ -107,9 +109,10 @@ class CANController : public Task
 
 		CANBus::channel_t _channel;
 		CAN_HandleTypeDef _handle;
-		CanTxMsgTypeDef _txMsg;
-		CanRxMsgTypeDef _rxMsg;
-		CanRxMsgTypeDef _rxMsgBuf[16];
+		//CanTxMsgTypeDef _txMsg;
+		//CanRxMsgTypeDef _rxMsg;
+		//CanRxMsgTypeDef _rxMsgBuf[16];
+		CANMessage _rxMsgBuf[NUM_CAN_MOBS];
 
 		Queue<uint8_t> _freeSwMobs;
 		Queue<uint8_t> _usedSwMobs;
@@ -130,7 +133,8 @@ class CANController : public Task
 		void enableInterrupts(uint32_t interruptFlags);
 		void disableInterrupts(uint32_t interruptFlags);
 		void handleRx(void);
-		void notifyObservers(CanRxMsgTypeDef *msgHndle);
+		void notifyObservers(CANMessage *msgHndle);
+		int32_t transmitMessage(CANMessage *msg);
 
 		observer_list_t *createObserverListFragment();
 

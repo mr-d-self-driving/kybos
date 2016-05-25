@@ -29,9 +29,12 @@
 
 #ifdef HAL_CAN_MODULE_ENABLED
 
+
 CANController::CANController(CANBus::channel_t channel) :
 	Task(0, 160),
 	_channel(channel),
+	_freeSwMobs(NUM_CAN_MOBS),
+	_usedSwMobs(NUM_CAN_MOBS),
 	_observerMutex(),
 	_lastMessageReceivedTimestamp(0),
 	_silent(false),
@@ -137,8 +140,8 @@ void CANController::setup(CANBus::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpi
 	_handle.Init.ABOM = ENABLE;
 	_handle.Init.Mode = CAN_MODE_NORMAL;
 
-	_handle.pRxMsg = &_rxMsg;
-	_handle.pTxMsg = &_txMsg;
+	//_handle.pRxMsg = &_rxMsg;
+	//_handle.pTxMsg = &_txMsg;
 
 
 	setBitrate(bitrate);
@@ -172,6 +175,10 @@ void CANController::setup(CANBus::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpi
 		while(1) {;}
 	}
 
+
+	for (int i=0; i<NUM_CAN_MOBS; i++) {
+		_freeSwMobs.sendToBack(i, 0);
+	}
 
 
 	HAL_CAN_Init(&_handle);
@@ -246,6 +253,21 @@ void CANController::setup(CANBus::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpi
 	__HAL_CAN_ENABLE_IT(&_handle, CAN_IT_FMP0); /* Enable 'message pending in FIFO0' interrupt */
 	__HAL_CAN_ENABLE_IT(&_handle, CAN_IT_FMP1); /* Enable 'message pending in FIFO0' interrupt */
 
+/*
+	// Error warning Interrupt
+	__HAL_CAN_ENABLE_IT(&_handle, CAN_IT_EWG);
+	// Error passive Interrupt
+	__HAL_CAN_ENABLE_IT(&_handle, CAN_IT_EPV);
+	// Enable Bus-off Interrupt
+	__HAL_CAN_ENABLE_IT(&_handle, CAN_IT_BOF);
+	// Enable Last error code Interrupt
+	__HAL_CAN_ENABLE_IT(&_handle, CAN_IT_LEC);
+	// Enable Error Interrupt
+	__HAL_CAN_ENABLE_IT(&_handle, CAN_IT_ERR);
+	// Enable Transmit mailbox empty Interrupt
+	__HAL_CAN_ENABLE_IT(&_handle, CAN_IT_TME);
+*/
+
 	this->enable();
 
 }
@@ -296,23 +318,15 @@ bool CANController::sendMessage(CANMessage *msg)
 
 	if (_silent) return true;
 
-	_handle.pTxMsg->DLC = msg->dlc;
-	_handle.pTxMsg->IDE = msg->isExtendedId()?CAN_ID_EXT:CAN_ID_STD;
-	if (msg->id > 0x7ff) {
-		_handle.pTxMsg->IDE = CAN_ID_EXT;
-	}
-	_handle.pTxMsg->RTR = msg->isRemoteFrame()?CAN_RTR_REMOTE:CAN_RTR_DATA;
-	memcpy(_handle.pTxMsg->Data, msg->data, msg->dlc);
-	if (_handle.pTxMsg->IDE) {
-		_handle.pTxMsg->ExtId = msg->id;
-	}
-	else {
-		_handle.pTxMsg->StdId = msg->id;
-	}
+	uint32_t t = getTime();
+	do {
+		int32_t status = transmitMessage(msg);
+		if (status >= 0) {
+			return true;
+		}
+	} while (getTime() < t + _timeToWaitForFreeMob);
 
-	HAL_StatusTypeDef status = HAL_CAN_Transmit(&_handle, _timeToWaitForFreeMob);
-	//HAL_StatusTypeDef status = HAL_CAN_Transmit_IT(&_handle);
-	return (status == HAL_OK);
+	return false;
 }
 
 CANController *CANController::_controllers[CANBus::num_channels] = {0,};
@@ -345,7 +359,7 @@ CANController *CANController::get(CANBus::channel_t channel)
 	return _controllers[channel];
 }
 
-void CANController::notifyObservers(CanRxMsgTypeDef *msgHndle)
+void CANController::notifyObservers(CANMessage *msgHndle)
 {
 	MutexGuard guard(&_observerMutex);
 
@@ -355,17 +369,16 @@ void CANController::notifyObservers(CanRxMsgTypeDef *msgHndle)
 			observer_list_entry_t *entry = &list->entries[i];
 			if (!entry->observer) continue;
 
-			uint32_t canid = ((msgHndle->IDE)==CAN_ID_EXT)?msgHndle->ExtId:msgHndle->StdId;
-			if ( (canid & entry->mask) == (entry->can_id & entry->mask) )
+			if ( (msgHndle->id & entry->mask) == (entry->can_id & entry->mask) )
 			{
 				// match. notify the observer.
 				CANMessage *msg = _pool.getMessage();
 				if (msg) {
-					msg->_flags  = msgHndle->IDE | msgHndle->RTR;
+					msg->_flags  = msgHndle->_flags;
 					msg->_receivingController = this;
-					msg->id = canid;
-					msg->dlc = msgHndle->DLC;
-					memcpy(msg->data, msgHndle->Data, sizeof(msg->data));
+					msg->id = msgHndle->id;
+					msg->dlc = msgHndle->dlc;
+					memcpy(msg->data, msgHndle->data, 8);
 
 
 					if (!entry->observer->notifyCANMessage(msg)) {
@@ -654,10 +667,57 @@ bool CANController::sendMessage(uint32_t id, uint8_t dlc, const void* const ptr)
 
 void CANController::handleRx(void)
 {
+
 	uint8_t rxBufId;
-	_freeSwMobs.receiveFromISR(&rxBufId);
-	memcpy (&_rxMsgBuf[rxBufId], _handle.pRxMsg, sizeof(CanRxMsgTypeDef));
-	_usedSwMobs.sendToBackFromISR(rxBufId);
+	uint32_t tmp1, tmp2;
+	uint32_t fifoNumber=0xffffffff;
+	CANMessage *msg;
+
+	tmp1 = __HAL_CAN_MSG_PENDING(&_handle, CAN_FIFO0);
+	tmp2 = __HAL_CAN_GET_IT_SOURCE(&_handle, CAN_IT_FMP0);
+	if( tmp1 && tmp2 ) {
+		fifoNumber = CAN_FIFO0;
+	}
+
+	tmp1 = __HAL_CAN_MSG_PENDING(&_handle, CAN_FIFO1);
+	tmp2 = __HAL_CAN_GET_IT_SOURCE(&_handle, CAN_IT_FMP1);
+	if( tmp1 && tmp2 ) {
+		fifoNumber = CAN_FIFO1;
+	}
+
+	if (fifoNumber == CAN_FIFO0 || fifoNumber == CAN_FIFO1) {
+		if (_freeSwMobs.receiveFromISR(&rxBufId) ) {
+
+			msg = &_rxMsgBuf[rxBufId];
+
+			if ( _handle.Instance->sFIFOMailBox[fifoNumber].RIR & 0x04) {
+				msg->id = (uint32_t)0x1FFFFFFF & (_handle.Instance->sFIFOMailBox[fifoNumber].RIR >> 3);
+				msg->setExtendedId(true);
+			}
+			else {
+				msg->id = (uint32_t)0x000007FF & (_handle.Instance->sFIFOMailBox[fifoNumber].RIR >> 21);
+				msg->setExtendedId(false);
+			}
+
+			msg->setRemoteFrame( _handle.Instance->sFIFOMailBox[fifoNumber].RIR & 0x02 );
+			msg->dlc = _handle.Instance->sFIFOMailBox[fifoNumber].RDTR & 0x0F;
+			msg->data[0] = _handle.Instance->sFIFOMailBox[fifoNumber].RDLR;
+			msg->data[1] = _handle.Instance->sFIFOMailBox[fifoNumber].RDLR >> 8;
+			msg->data[2] = _handle.Instance->sFIFOMailBox[fifoNumber].RDLR >> 16;
+			msg->data[3] = _handle.Instance->sFIFOMailBox[fifoNumber].RDLR >> 24;
+			msg->data[4] = _handle.Instance->sFIFOMailBox[fifoNumber].RDHR;
+			msg->data[5] = _handle.Instance->sFIFOMailBox[fifoNumber].RDHR >> 8;
+			msg->data[6] = _handle.Instance->sFIFOMailBox[fifoNumber].RDHR >> 16;
+			msg->data[7] = _handle.Instance->sFIFOMailBox[fifoNumber].RDHR >> 24;
+
+			_usedSwMobs.sendToBackFromISR(rxBufId);
+
+		}
+
+		// Release FIFO
+		__HAL_CAN_FIFO_RELEASE(&_handle, fifoNumber);
+
+	}
 }
 
 void CANController::setSilent(bool beSilent)
@@ -676,54 +736,60 @@ extern "C" {
 #ifdef STM32F0
 void CEC_CAN_IRQHandler(void)
 {
-	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
-	__HAL_CAN_ENABLE_IT(&CANController::_controllers[0]->_handle, CAN_IT_FMP0); /* Enable 'message pending in FIFO0' interrupt */
-	__HAL_CAN_ENABLE_IT(&CANController::_controllers[0]->_handle, CAN_IT_FMP1); /* Enable 'message pending in FIFO1' interrupt */
+	//HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
+	//__HAL_CAN_ENABLE_IT(&CANController::_controllers[0]->_handle, CAN_IT_FMP0); /* Enable 'message pending in FIFO0' interrupt */
+	//__HAL_CAN_ENABLE_IT(&CANController::_controllers[0]->_handle, CAN_IT_FMP1); /* Enable 'message pending in FIFO1' interrupt */
+#error "TODO TODO TODO"
 }
 #endif
 
 
 #ifdef STM32F4
 
+#if 0
 void CAN1_TX_IRQHandler(void)
 {
-	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
+	//HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
 }
+#endif
+
 
 void CAN1_RX0_IRQHandler(void)
 {
-	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
-	__HAL_CAN_ENABLE_IT(&CANController::_controllers[0]->_handle, CAN_IT_FMP0); /* Enable 'message pending in FIFO0' interrupt */
+	CANController::_controllers[0]->handleRx();
+
 }
 
 void CAN1_RX1_IRQHandler(void)
 {
-	HAL_CAN_IRQHandler(&CANController::_controllers[0]->_handle);
-	__HAL_CAN_ENABLE_IT(&CANController::_controllers[0]->_handle, CAN_IT_FMP1); /* Enable 'message pending in FIFO1' interrupt */
+	CANController::_controllers[0]->handleRx();
+
 }
 
+#if 0
 void CAN2_TX_IRQHandler(void)
 {
-	HAL_CAN_IRQHandler(&CANController::_controllers[1]->_handle);
+	//HAL_CAN_IRQHandler(&CANController::_controllers[1]->_handle);
 }
+#endif
 
 void CAN2_RX0_IRQHandler(void)
 {
-	HAL_CAN_IRQHandler(&CANController::_controllers[1]->_handle);
-	__HAL_CAN_ENABLE_IT(&CANController::_controllers[1]->_handle, CAN_IT_FMP0); /* Enable 'message pending in FIFO0' interrupt */
+	CANController::_controllers[1]->handleRx();
 }
 
 void CAN2_RX1_IRQHandler(void)
 {
-	HAL_CAN_IRQHandler(&CANController::_controllers[1]->_handle);
-	__HAL_CAN_ENABLE_IT(&CANController::_controllers[1]->_handle, CAN_IT_FMP1); /* Enable 'message pending in FIFO1' interrupt */
+	CANController::_controllers[1]->handleRx();
 }
 
 #endif
 
 
+#if 0
 void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef *hcan)
 {
+
 
 #if defined (CAN)
 	UNUSED(hcan);
@@ -741,15 +807,59 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef *hcan)
 		CANController::_controllers[1]->handleRx();
 	}
 #endif
+
 }
 
 void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef *hcan)
 {
 	UNUSED(hcan);
 }
-
+#endif
 
 }
+
+
+int32_t CANController::transmitMessage(CANMessage *msg)
+{
+	uint32_t  transmitmailbox;
+
+	if ( _handle.Instance->TSR & (CAN_TSR_TME0|CAN_TSR_TME2|CAN_TSR_TME2) ) {
+		if( _handle.Instance->TSR&CAN_TSR_TME0 ) {
+			transmitmailbox = 0;
+		}
+		else if( _handle.Instance->TSR&CAN_TSR_TME1 ) {
+			transmitmailbox = 1;
+		}
+		else {
+			transmitmailbox = 2;
+		}
+
+		_handle.Instance->sTxMailBox[transmitmailbox].TIR &= ~CAN_TI0R_TXRQ;
+		if( ! msg->isExtendedId() ) {
+			assert_param(IS_CAN_STDID(msg->id));
+			_handle.Instance->sTxMailBox[transmitmailbox].TIR = (msg->id << 21) | ((msg->isRemoteFrame())?CAN_RTR_REMOTE:CAN_RTR_DATA);
+		}
+		else {
+			assert_param(IS_CAN_EXTID(msg->id));
+			_handle.Instance->sTxMailBox[transmitmailbox].TIR = (msg->id << 3) |  CAN_ID_EXT | ((msg->isRemoteFrame())?CAN_RTR_REMOTE:CAN_RTR_DATA);
+		}
+
+		_handle.Instance->sTxMailBox[transmitmailbox].TDTR &= ~0x0f;
+		_handle.Instance->sTxMailBox[transmitmailbox].TDTR |= msg->dlc;
+
+		_handle.Instance->sTxMailBox[transmitmailbox].TDLR = (msg->data[3] << 24) | (msg->data[2] << 16) | (msg->data[1] << 8) | msg->data[0];
+		_handle.Instance->sTxMailBox[transmitmailbox].TDHR = (msg->data[7] << 24) | (msg->data[6] << 16) | (msg->data[5] << 8) | msg->data[4];
+
+		// Request transmission
+		_handle.Instance->sTxMailBox[transmitmailbox].TIR |= CAN_TI0R_TXRQ;
+	}
+	else {
+		return -1;
+	}
+
+	return 0;
+}
+
 
 #endif // HAL_CAN_MODULE_ENABLED
 
