@@ -26,10 +26,10 @@
 #include <string.h>
 
 CANCyclicMessage::CANCyclicMessage(CANMessage *msg, uint16_t interval, uint16_t offset) :
-	_msg(msg),
 	_interval(interval),
 	_offset(offset),
-	_enabled(true)
+	_enabled(true),
+	_msg(msg)
 {
 	_timestamp_next_send = Task::getTime() + _offset;
 }
