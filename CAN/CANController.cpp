@@ -29,9 +29,8 @@
 
 #ifdef HAL_CAN_MODULE_ENABLED
 
-
 CANController::CANController(CANBus::channel_t channel) :
-	Task(0, 160),
+	Task(0, 128),
 	_channel(channel),
 	_freeSwMobs(NUM_CAN_MOBS),
 	_usedSwMobs(NUM_CAN_MOBS),
@@ -43,10 +42,10 @@ CANController::CANController(CANBus::channel_t channel) :
 	_pool(20)
 {
 	static const char* tasknames[CANBus::num_channels] = {
-#ifdef CAN1
-			"can1"
+#if defined (CAN1) || defined (CAN)
+			"can1",
 #endif
-#ifdef CAN2
+#if defined (CAN2)
 			"can2",
 #endif
 	 };
@@ -242,7 +241,7 @@ void CANController::setup(CANBus::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpi
 	case CANBus::channel_1:
 #if defined(STM32F0)
 		HAL_NVIC_SetPriority(CEC_CAN_IRQn, 3, 0); /* Set CAN1 Rx interrupt priority to 3-0 */
-		HAL_NVIC_EnableIRQ(CEC_CAN_IRQn); /* Enable CAN1 Rx Interrupt */
+		HAL_NVIC_EnableIRQ(CEC_CAN_IRQn); /* Enable CAN (and CEC) Interrupt */
 #endif
 		break;
 #endif
@@ -251,7 +250,7 @@ void CANController::setup(CANBus::bitrate_t bitrate, GPIOPin rxpin, GPIOPin txpi
 	}
 
 	__HAL_CAN_ENABLE_IT(&_handle, CAN_IT_FMP0); /* Enable 'message pending in FIFO0' interrupt */
-	__HAL_CAN_ENABLE_IT(&_handle, CAN_IT_FMP1); /* Enable 'message pending in FIFO0' interrupt */
+	__HAL_CAN_ENABLE_IT(&_handle, CAN_IT_FMP1); /* Enable 'message pending in FIFO1' interrupt */
 
 /*
 	// Error warning Interrupt
@@ -339,12 +338,12 @@ CANController *CANController::get(CANBus::channel_t channel)
 	{
 		switch (channel) {
 
-#ifdef CAN1
+#if defined (CAN1) || defined (CAN)
 			case CANBus::channel_1:
 				break;
 #endif
 
-#ifdef CAN2
+#if defined (CAN2)
 			case CANBus::channel_2:
 				break;
 #endif
@@ -488,11 +487,13 @@ void CANController::unregisterCyclicMessage(CANCyclicMessage *cmsg)
 	_cyclicMessages.removeItem(cmsg);
 }
 
+/*
 void CANController::registerCyclicMessage(CANMessage *msg, uint32_t interval)
 {
 	CANCyclicMessage *cmsg = new CANCyclicMessage(msg, interval);
 	_cyclicMessages.addItem(cmsg);
 }
+*/
 
 void CANController::unregisterCyclicMessage(CANMessage *msg)
 {
