@@ -33,7 +33,7 @@
 
 #elif defined (STM32F405xx) || defined (STM32F415xx) || defined (STM32F407xx) || defined (STM32F417xx) || \
     defined (STM32F427xx) || defined (STM32F437xx) || defined (STM32F429xx) || defined (STM32F439xx) || \
-    defined (STM32F401xC) || defined (STM32F401xE) || defined (STM32F411xE)
+    defined (STM32F401xC) || defined (STM32F401xE) || defined (STM32F411xE) || defined (STM32F446xx)
 
 
 	#define STM32_FAMILY stm32f4xx
@@ -53,7 +53,7 @@
 
 #if defined (STM32L151xCA) || defined (STM32L151xD) || defined (STM32L152xCA) || defined (STM32L152xD) || defined (STM32L162xCA) \
 	|| defined (STM32L162xD) || defined (STM32L151xE) || defined (STM32L151xDX) || defined (STM32L152xE) || defined (STM32L152xDX) \
-	|| defined (STM32L162xE) || defined (STM32L162xDX) || defined (STM32F429xx)
+	|| defined (STM32L162xE) || defined (STM32L162xDX) || defined (STM32F429xx) || defined (STM32F446xx)
 #define HAS_GPIO_A
 #define HAS_GPIO_B
 #define HAS_GPIO_C
