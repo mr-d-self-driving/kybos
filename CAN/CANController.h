@@ -296,8 +296,10 @@ class CANController : public Task
 		int unregisterObserver(CANObserver *observer, int32_t can_id, uint32_t mask=0xFFFFFFFF);
 		void returnMessageToPool(CANMessage *obj);
 
+/*
 		/// create and register a CANCyclicMessage. deprecated.
 		void registerCyclicMessage(CANMessage *msg, uint32_t interval);
+*/
 
 		/// unregister a CANCyclicMessage by its CANMessage object. deprecated.
 		void unregisterCyclicMessage(CANMessage *msg);

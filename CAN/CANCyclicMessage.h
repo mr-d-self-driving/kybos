@@ -48,15 +48,17 @@ class CANCyclicMessage {
 	friend class CANController;
 private:
 	RecursiveMutex _lock;
-	CANMessage *_msg;
 	uint16_t _interval;
 	uint16_t _offset;
 	bool _enabled;
 	uint32_t _timestamp_next_send;
 
+protected:
+	CANMessage *_msg;
+
 public:
-	void send(CANController *can);
-	CANCyclicMessage(CANMessage *msg, uint16_t interval, uint16_t offset=0);
+	virtual void send(CANController *can);
+	//CANCyclicMessage(CANMessage *msg, uint16_t interval, uint16_t offset=0);
 
 	/**
 	 * @param id the can id of the transmitted message
@@ -64,7 +66,7 @@ public:
 	 * @param interval interval the cyclic message is sent in (in ms)
 	 * @param offset timing offset of the cyclic message (in ms)
 	 */
-	CANCyclicMessage(uint32_t id, uint8_t dlc, uint16_t interval, uint16_t offset=0);
+	//CANCyclicMessage(uint32_t id, uint8_t dlc, uint16_t interval, uint16_t offset=0);
 
 	/**
 	 * @param canCtrl CANController to which this message should be registered
