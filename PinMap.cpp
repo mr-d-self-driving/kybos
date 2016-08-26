@@ -10,7 +10,7 @@
 #include <stdint.h>
 
 
-#ifdef STM32F429xx
+#if defined (STM32F429xx) || defined (STM32F446xx)
 
 #if defined (HAL_UART_MODULE_ENABLED)
 
@@ -631,7 +631,7 @@ void GPIOPin::mapAsSPI6NSS()
 
 
 
-#endif // STM32F429xx
+#endif // defined (STM32F429xx) || defined (STM32F446xx)
 
 #ifdef STM32F072
 
